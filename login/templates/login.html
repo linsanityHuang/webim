@@ -1,0 +1,73 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  {% block css %}
+        <link rel="stylesheet" href="{% static 'dist/css/layui.css' %}" media="all">
+  {% endblock %}
+</head>
+{% block script %}
+    <script src="{% static 'dist/layui.js' %}"></script>
+{% endblock %}
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<body>
+<form class="layui-form" action="">
+  {% csrf_token %}
+  <div class="layui-form-item">
+    <label class="layui-form-label">用户名</label>
+    <div class="layui-input-block">
+      <input type="text" name="username" required  lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">密码</label>
+    <div class="layui-input-inline">
+      <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+    </div>
+    <div class="layui-form-mid layui-word-aux">辅助文字</div>
+  </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+		<button type="submit" class="layui-btn" lay-submit lay-filter="*">登录</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	    <button id="signup" type="button" class="layui-btn">注册新用户</button>
+    </div>
+  </div>
+</form>
+
+<script>
+layui.use(['form', 'jquery'], function(){
+    var form = layui.form
+    ,$ = layui.jquery;
+    //监听提交
+    form.on('submit(*)', function(data){
+        $.ajax({
+            url: '/login/do_login/',
+            type: 'post',
+	        dataType:'json',
+            data: data.field,
+            success: function(data){
+                console.log(data)
+	            if (data.code === 0){
+	            	location.href = '/chat/chat_home/?user_id='+data.user_id
+	            }
+	            else {
+	            	alert('登录失败')
+	            }
+            },
+        })
+	    return false;
+    });
+});
+
+$('#signup').on('click', function () {
+	location.href = 'login/signup/'
+})
+</script>
+</body>
+</html>
