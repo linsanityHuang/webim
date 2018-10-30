@@ -16,6 +16,7 @@
 {% endblock %}
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <body>
+<!--<i class="layui-icon layui-icon-dialogue"></i>-->
 <form class="layui-form" action="">
   {% csrf_token %}
   <div class="layui-form-item">
@@ -49,10 +50,10 @@ layui.use(['form', 'jquery'], function(){
         $.ajax({
             url: '/login/do_login/',
             type: 'post',
-	        dataType:'json',
+	        // dataType:'json',
             data: data.field,
             success: function(data){
-                console.log(data)
+                console.log(data);
 	            if (data.code === 0){
 	            	location.href = '/chat/chat_home/?user_id='+data.user_id
 	            }
@@ -61,12 +62,12 @@ layui.use(['form', 'jquery'], function(){
 	            }
             },
         })
-	    return false;
+	    // return false;
     });
 });
 
 $('#signup').on('click', function () {
-	location.href = 'login/signup/'
+	location.href = '/login/signup/'
 })
 </script>
 </body>

@@ -1,8 +1,6 @@
-from django.shortcuts import render, redirect, reverse,render_to_response
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
-from chat.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
+from django.http import JsonResponse
+from chat.models import User, Group
 
 
 def do_login(request):
@@ -11,28 +9,27 @@ def do_login(request):
 	:param request:
 	:return:
 	'''
-	if request.method == 'GET':
-		return render(request, 'login.html')
-	
-	username = request.POST.get('username', None)
-	password = request.POST.get('password', None)
-	print('username', username)
-	print('password', password)
-	# user = authenticate(request, username=username, password=password)
-	user = User.objects.get(username=username, password=password)
-	print(user)
-	print(1)
-	if user is not None:
-		# 查询好友，群组，历史记录
-		# login(request, user)
-		print('已登录')
-		return JsonResponse({'code': 0, 'status': True, 'info': '登录成功', 'user_id': user.id})
-	else:
-		print(2)
-		return render(request, 'login.html', {
-			'username': username,
-			'password': password,
-		})
+	if request.method == 'POST':
+		# print('do_login post')
+		username = request.POST.get('username', None)
+		password = request.POST.get('password', None)
+		print('username', username)
+		print('password', password)
+		# user = authenticate(request, username=username, password=password)
+		user = User.objects.filter(username=username, password=password)
+		print(user)
+		if user.count() == 1:
+			# 查询好友，群组，历史记录
+			# login(request, user)
+			print('已登录')
+			return JsonResponse({'code': 0, 'status': True, 'info': '登录成功', 'user_id': user[0].id})
+			# return render(request, 'chat.html', context={'user_id': user[0].id})
+			# return HttpResponseRedirect(reverse('chat_home'))
+		else:
+			print('用户不存在')
+			return render(request, 'login.html', {'username': username, 'password': password})
+	print('do_login get')
+	return render(request, 'login.html')
 
 
 def signin(request):
@@ -64,13 +61,16 @@ def signin(request):
 		print('city', city)
 		print('birthday', birthday)
 		print('phone', phone)
-		user = User.objects.filter(username=username)
-		print(user)
-		if len(user) == 1:
+		users = User.objects.filter(username=username)
+		# print(user)
+		if users.count() != 0:
 			return JsonResponse({'code': -1, 'status': False, 'info': '注册失败, 用户名已经存在'})
 		user = User.objects.create(username=username, password=password, email=email, phone=phone,
 							city=city, birthday=birthday, signature=signature, sex=sex)
+		# 用户创建成功的时候创建默认好友分组
+		Group.objects.create(name="我的好友", owner=user)
 		return JsonResponse({'code': 0, 'status': True, 'info': '注册成功', 'data': user.id})
+		# return HttpResponseRedirect(reverse('index'))
 	
 
 def signup(request):
@@ -80,8 +80,3 @@ def signup(request):
 	:return:
 	'''
 	return render(request, 'signup.html', {})
-
-
-def logout_user(request):
-	logout(request)
-	return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

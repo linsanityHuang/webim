@@ -7,7 +7,7 @@ import datetime
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from chat.models import User, Group, GroupChat, ImageModel
+from chat.models import User, Group, GroupChat, ImageModel, FileModel
 
 res = {
 		'code': -1,
@@ -92,7 +92,7 @@ def publish(channel, content):
 		content=content,
 	)
 	r = requests.post(url, data=data)
-	print(r.json())
+	# print(r.json())
 	code = r.json().get('code', None)
 	if code == 200:
 		return True
@@ -131,15 +131,23 @@ def init_user(request):
 	friends = list()
 	for item in groups:
 		# print('group', item.name)
-		friend_list = [{'username': fri.username, 'id': fri.id, 'avatar': fri.avatar, 'sign': fri.signature, 'status': fri.status}
-					 for fri in item.group_members.all()]
+		friend_list = [
+			{
+				'username': fri.username,
+				'id': fri.id,
+				'avatar': fri.avatar,
+				'sign': fri.signature,
+				'status': fri.get_status_display()
+			}
+			for fri in item.group_members.all()
+		]
 		group_friends = {
 			'groupname': item.name,
 			'id': item.id,
 			'list': friend_list,
 		}
 		friends.append(group_friends)
-	
+	print(friends)
 	# 好友列表
 	res['data']['friend'] = friends
 	
@@ -294,14 +302,36 @@ def search_friend(request):
 	}
 	if request.method == 'POST':
 		key_word = request.POST.get('key_word', None)
-		if key_word is None:
+		search_type = request.POST.get('search_type', None)
+		if not key_word or not search_type:
 			res['code'] = -1
-			res['msg'] = 'kew_word is none'
+			res['msg'] = 'invalid parameters'
 			return JsonResponse(res)
-		result = [{'username': user.username, 'id': user.id, 'sex': user.sex, 'sign': user.signature, 'avatar': user.avatar}
-				  for user in User.objects.filter(username__icontains=key_word)]
-		res['count'] = len(result)
-		res['data'] = result
+		# 搜好友
+		if int(search_type) == 0:
+			result = [
+				{
+					'username': user.username,
+					'id': user.id,
+					'sex': user.get_sex_display(),
+					'sign': user.signature,
+					'avatar': user.avatar
+				}
+				for user in User.objects.filter(username__icontains=key_word)
+			]
+			res['count'] = len(result)
+			res['data'] = result
+		else:
+			result = [
+				{
+					'id': group_chat.id,
+					'group_chat_name': group_chat.name,
+					'avatar': group_chat.group_chat_avatar
+				}
+				for group_chat in GroupChat.objects.filter(name__icontains=key_word)
+			]
+			res['count'] = len(result)
+			res['data'] = result
 		return JsonResponse(res)
 
 
@@ -321,6 +351,28 @@ def upload_image(request):
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
+		print(res)
+		return JsonResponse(res)
+	res['msg'] = '上传文件失败'
+	return JsonResponse(res)
+
+
+@csrf_exempt
+def upload_file(request):
+	'''
+	上传文件
+	:param request:
+	:return:
+	'''
+	if request.method == 'POST':
+		file_ = request.FILES.get('file')
+		file_.name = str(uuid.uuid4()) + file_.name
+		file_model = FileModel.objects.create(model_file=file_)
+		# qiniu_upload(pic)
+		print(file_model.model_file.name)
+		res['code'] = 0
+		date = datetime.datetime.now().strftime("%y%m%d")
+		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, file_.name)
 		print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
@@ -348,6 +400,26 @@ def modify_sign(request):
 	
 
 @csrf_exempt
+def modify_status(request):
+	'''
+	用户修改状态
+	:param request:
+	:return:
+	'''
+	if request.method == 'POST':
+		status = request.POST.get('status', None)
+		user_id = request.POST.get('id', None)
+		print('sign', status)
+		print('user_id', user_id)
+		if status and user_id:
+			user = User.objects.get(pk=user_id)
+			user.status = 'ON' if status == 'online' else 'OFF'
+			user.save()
+			return JsonResponse({'code': 0, 'msg': 'success'})
+		return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
+	
+
+@csrf_exempt
 def group_chat_ids(request):
 	if request.method == 'POST':
 		user_id = request.POST.get('user_id', None)
@@ -357,3 +429,17 @@ def group_chat_ids(request):
 		group_chats = user.groupchat_set.all()
 		data = [item.id for item in group_chats]
 		return JsonResponse({'code': 0, 'msg': '', 'data': data})
+	
+
+@csrf_exempt
+def add_group(request):
+	if request.method == 'POST':
+		user_id = request.POST.get('user_id', None)
+		group_chat_name = request.POST.get('group_chat_name', None)
+		group_chat_avatar = request.POST.get('group_chat_avatar', None)
+		if not group_chat_name or not user_id:
+			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
+		user = User.objects.get(pk=user_id)
+		group_chat = GroupChat.objects.create(name=group_chat_name)
+		group_chat.group_chat_members.add(user)
+		return JsonResponse({'code': 0, 'msg': '', 'data': {'group_id': group_chat.id, 'group_avatar': group_chat.group_chat_avatar}})
