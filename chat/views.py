@@ -1,7 +1,6 @@
 # chat/views.py
 import time
 import json
-import requests
 import uuid
 import datetime
 from django.utils.safestring import mark_safe
@@ -88,28 +87,7 @@ def msg_gateway(request):
 			'msg': msg,
 		}
 		channel_publish(to_user_id, content)
-		# publish(to_user_id, json.dumps(content))
 		return JsonResponse({'code': 0, 'status': True, 'info': '消息发送成功'})
-
-
-def publish(channel, content):
-	'''
-	:param msg:
-	:return:
-	'''
-	url = 'http://rest-hangzhou.goeasy.io/publish'
-	appkey = 'BC-88d728e1914144a893e8e438a1095518'
-	data = dict(
-		appkey=appkey,
-		channel=channel,
-		content=content,
-	)
-	r = requests.post(url, data=data)
-	# print(r.json())
-	code = r.json().get('code', None)
-	if code == 200:
-		return True
-	return False
 
 
 def init_user(request):
@@ -332,7 +310,7 @@ def apply_group_chat(request):
 		}
 		print('发送消息')
 		for admin in admins:
-			publish(admin.id, json.dumps(content))
+			channel_publish(admin.id, content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '申请已发送'})
 		
 

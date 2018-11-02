@@ -8,6 +8,7 @@ __pycache__/
 *.so
 chat/migrations/
 login/migrations/
+statics/upload/
 
 # Distribution / packaging
 .Python
