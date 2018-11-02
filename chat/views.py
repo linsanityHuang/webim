@@ -4,10 +4,12 @@ import json
 import requests
 import uuid
 import datetime
+from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from chat.models import User, Group, GroupChat, ImageModel, FileModel
+from chat.consumers import channel_publish
 
 res = {
 		'code': -1,
@@ -15,6 +17,16 @@ res = {
 		'data': {
 		}
 	}
+
+
+def index(request):
+	return render(request, 'chat/index.html', {})
+
+
+def room(request, room_name):
+	return render(request, 'chat/room.html', {
+		'room_name_json': mark_safe(json.dumps(room_name))
+	})
 
 
 def home(request):
@@ -72,10 +84,11 @@ def msg_gateway(request):
 			'timestamp': int(time.time() * 1000),
 		}
 		content = {
-			'type': 'msg',
+			'channel_type': 'msg',
 			'msg': msg,
 		}
-		publish(to_user_id, json.dumps(content))
+		channel_publish(to_user_id, content)
+		# publish(to_user_id, json.dumps(content))
 		return JsonResponse({'code': 0, 'status': True, 'info': '消息发送成功'})
 
 
@@ -153,7 +166,7 @@ def init_user(request):
 	
 	# 群组列表
 	user = User.objects.get(pk=user_id)
-	group_chats = user.groupchat_set.all()
+	group_chats = user.group_chat_members.all()
 	res['data']['group'] = [{'groupname': item.name, 'id': item.id, 'avatar': item.group_chat_avatar} for item in group_chats]
 	
 	# 我的信息
@@ -226,7 +239,7 @@ def add_friend(request):
 		print('%s要添加%s为好友' % (user.username, friend.username))
 		# 向用户B发送好友申请
 		content = {
-			'type': 'friend',
+			'channel_type': 'be_added_as_a_friend',
 			'msg': {
 				'type': 'friend',
 				'username': user.username,
@@ -238,7 +251,8 @@ def add_friend(request):
 				# 'sign': user.signature,
 			},
 		}
-		publish('%sbe_added_as_a_friend' % b_friend_id, json.dumps(content))
+		# publish(b_friend_id, json.dumps(content))
+		channel_publish(b_friend_id, content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '好友申请已发送'})
 	# 用户B同意用户A的好友申请
 	elif 'pass' == res_type:
@@ -261,6 +275,7 @@ def add_friend(request):
 		print('%s同意了%s的好友申请' % (friend.username, user.username))
 		# 向用户A通知申请通过
 		a_content = {
+			'channel_type': 'friend_result',
 			'type': 'pass',
 			'msg': {
 				'type': 'friend',
@@ -283,9 +298,43 @@ def add_friend(request):
 				'sign': user.signature,
 			},
 		}
-		publish('%sfriend_result' % user_id, json.dumps(a_content))
+		# publish('%sfriend_result' % user_id, json.dumps(a_content))
+		channel_publish(user_id, a_content)
 		return JsonResponse(b_content['msg'])
+	
 
+@csrf_exempt
+def apply_group_chat(request):
+	'''
+	申请加入群聊
+	:param request:
+	:return:
+	'''
+	if request.method == 'POST':
+		res_type = request.POST.get('res_type', None)
+		user_id = request.POST.get('user_id', None)
+		group_chat_id = request.POST.get('group_chat_id', None)
+		remark = request.POST.get('remark', None)
+		user = User.objects.get(pk=user_id)
+		# 给群聊管理员发送申请通知
+		group_chat = GroupChat.objects.get(pk=group_chat_id)
+		admins = group_chat.group_admins.all()
+		content = {
+			'type': 'add_group_chat',
+			'msg': {
+				'type': 'group',
+				'username': user.username,
+				'avatar': user.avatar,
+				'groupid': group_chat_id,
+				'id': user_id,
+				'sign': user.signature
+			},
+		}
+		print('发送消息')
+		for admin in admins:
+			publish(admin.id, json.dumps(content))
+		return JsonResponse({'code': 0, 'status': True, 'info': '申请已发送'})
+		
 
 @csrf_exempt
 def search_friend(request):
@@ -351,6 +400,30 @@ def upload_image(request):
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
+		print(res)
+		return JsonResponse(res)
+	res['msg'] = '上传文件失败'
+	return JsonResponse(res)
+
+
+@csrf_exempt
+def upload_avatar(request):
+	'''
+	用户上传头像
+	:param request:
+	:return:
+	'''
+	if request.method == 'POST':
+		user_id = request.GET.get('user_id', None)
+		pic = request.FILES.get('file')
+		pic.name = str(uuid.uuid4()) + pic.name.rsplit('.', 1)[1]
+		image = ImageModel.objects.create(model_pic=pic)
+		res['code'] = 0
+		date = datetime.datetime.now().strftime("%y%m%d")
+		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
+		user = User.objects.get(pk=user_id)
+		user.avatar = res['data']['src']
+		user.save()
 		print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
@@ -432,7 +505,13 @@ def group_chat_ids(request):
 	
 
 @csrf_exempt
-def add_group(request):
+def add_group_chat(request):
+	'''
+	新建群聊
+	创建者默认是群聊的管理员
+	:param request:
+	:return:
+	'''
 	if request.method == 'POST':
 		user_id = request.POST.get('user_id', None)
 		group_chat_name = request.POST.get('group_chat_name', None)
@@ -441,5 +520,50 @@ def add_group(request):
 			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
 		user = User.objects.get(pk=user_id)
 		group_chat = GroupChat.objects.create(name=group_chat_name)
+		group_chat.group_admins.add(user)
 		group_chat.group_chat_members.add(user)
 		return JsonResponse({'code': 0, 'msg': '', 'data': {'group_id': group_chat.id, 'group_avatar': group_chat.group_chat_avatar}})
+
+
+@csrf_exempt
+def add_group(request):
+	'''
+	新建好友分组
+	:param request:
+	:return:
+	'''
+	if request.method == 'POST':
+		user_id = request.POST.get('user_id', None)
+		group_name = request.POST.get('group_name', None)
+		group_avatar = request.POST.get('group_avatar', None)
+		if not group_name or not user_id:
+			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
+		user = User.objects.get(pk=user_id)
+		group = Group.objects.create(name=group_name, owner=user)
+		return JsonResponse({'code': 0, 'msg': '', 'data': {'group_id': group.id}})
+	
+
+@csrf_exempt
+def user_info(request):
+	if request.method == 'GET':
+		user_id = request.GET.get('user_id', None)
+		if user_id:
+			user = User.objects.get(pk=user_id)
+			return render(request, 'user_info.html', context={'user': user})
+		return render(request, 'user_info.html')
+	else:
+		signature = request.POST.get('signature', None)
+		email = request.POST.get('email', None)
+		# city = request.POST.get('city', None)
+		birthday = request.POST.get('birthday', None)
+		phone = request.POST.get('phone', None)
+		user_id = request.POST.get('user_id', None)
+		if not user_id:
+			return JsonResponse({'code': -1, 'status': False, 'info': 'invalid user_id'})
+		user = User.objects.get(pk=user_id)
+		user.signature = signature
+		user.email = email
+		user.birthday = birthday
+		user.phone = phone
+		user.save()
+		return JsonResponse({'code': 0, 'status': True, 'info': '修改成功'})

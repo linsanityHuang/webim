@@ -26,6 +26,9 @@ class User(models.Model):
 	# 用户头像
 	avatar = models.CharField(max_length=128, default='/statics/img/default_avatar_male_180.gif', verbose_name="头像")
 	
+	# avatar = models.ImageField(upload_to='statics/upload/%y%m%d', blank=True, null=True,
+	# 						   default='/statics/img/default_avatar_male_180.gif', verbose_name="头像")
+	
 	STATUS = (
 		('ON', 'online'),
 		('OFF', 'hide'),
@@ -58,8 +61,10 @@ class GroupChat(models.Model):
 	'''
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=128)
+	# 群聊管理员
+	group_admins = models.ManyToManyField(User, related_name="group_admins")
 	group_chat_avatar = models.CharField(max_length=128, default='/statics/img/default_avatar_male_180.gif')
-	group_chat_members = models.ManyToManyField(User)
+	group_chat_members = models.ManyToManyField(User, related_name='group_chat_members')
 	
 	def __str__(self):
 		return self.name

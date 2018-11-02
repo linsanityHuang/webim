@@ -2,15 +2,86 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8">
-<link rel="icon" href="{% static 'img/logo.ico' %}" type="img/x-ico" />
-<title>BatMan</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!--<link rel="icon" href="{% static 'img/logo.ico' %}" type="img/x-ico" />-->
+	<title>BatMan</title>
     {% block css %}
         <link rel="stylesheet" href="{% static 'dist/css/layui.css' %}" media="all">
     {% endblock %}
 </head>
-<body>
-<button class="layui-btn site-demo-layim" data-type="addGroup">新建群聊</button>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+	<div class="layui-header">
+	<div class="layui-logo">layui 后台布局</div>
+	<!-- 头部区域（可配合layui已有的水平导航） -->
+	<ul class="layui-nav layui-layout-left">
+		<li class="layui-nav-item"><a href="javascript:;">控制台</a></li>
+		<li class="layui-nav-item"><a href="javascript:;">商品管理</a></li>
+		<li class="layui-nav-item"><a href="javascript:;">用户</a></li>
+		<li class="layui-nav-item">
+			<a href="javascript:;">其它系统</a>
+			<dl class="layui-nav-child">
+				<dd><a href="javascript:;">邮件管理</a></dd>
+				<dd><a href="javascript:;">消息管理</a></dd>
+				<dd><a href="javascript:;">授权管理</a></dd>
+			</dl>
+		</li>
+	</ul>
+	<ul class="layui-nav layui-layout-right">
+		<li class="layui-nav-item">
+			<a href="javascript:;" id="user">
+				<img src="" class="layui-nav-img">
+				<span id="username"></span>
+			</a>
+			<dl class="layui-nav-child">
+				<dd><a id="user_info" href="" target="_blank" class="site-demo-layim" data-type="user_info">基本资料</a></dd>
+				<dd><a href="javascript:;" class="site-demo-layim" data-type="addGroupChat">新建群聊</a></dd>
+				<dd><a href="javascript:;" class="site-demo-layim" data-type="addGroup">新建分组</a></dd>
+			</dl>
+		</li>
+		<li class="layui-nav-item"><a href="" id="logout">退了</a></li>
+	</ul>
+	</div>
+
+  <div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+      <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+      <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+        <li class="layui-nav-item layui-nav-itemed">
+          <a class="" href="javascript:;">所有商品</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">列表一</a></dd>
+            <dd><a href="javascript:;">列表二</a></dd>
+            <dd><a href="javascript:;">列表三</a></dd>
+            <dd><a href="javascript:;">超链接</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item">
+          <a href="javascript:;">解决方案</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">列表一</a></dd>
+            <dd><a href="javascript:;">列表二</a></dd>
+            <dd><a href="javascript:;">超链接</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item"><a href="javascript:;">云市场</a></li>
+        <li class="layui-nav-item"><a href="javascript:;">发布商品</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layui-body">
+    <!-- 内容主体区域 -->
+    <!--<div style="padding: 15px;">内容主体区域</div>-->
+  </div>
+
+  <div class="layui-footer">
+    <!-- 底部固定区域 -->
+    © layui.com
+  </div>
+</div>
+<!--<button class="layui-btn site-demo-layim" data-type="addGroup">新建群聊</button>-->
 <script type="text/javascript" src="http://cdn-hangzhou.goeasy.io/goeasy.js"></script>
 {% block script %}
     <script src="{% static 'dist/layui.js' %}"></script>
@@ -18,8 +89,11 @@
 	<script src="{% static 'js/socket.js'%}"></script>
 {% endblock %}
 <script>
-layui.use(['layim', 'jquery'], function(layim){
-	var $ = layui.jquery;
+var u = null;
+layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
+	var $ = layui.jquery
+	,element = layui.element
+	,layer = layui.layer;
 	var user_id = get_query_param('user_id');
 
     layim.config({
@@ -58,19 +132,19 @@ layui.use(['layim', 'jquery'], function(layim){
           ,title: '代码' //工具名称
           ,icon: '&#xe64e;' //工具图标，参考图标文档
         }]
-	    // 是否简约模式（若开启则不显示主面板）
-		,brief: false
-	    // 自定义主面板最小化时的标题
-	    ,title: 'WebIM'
-		,right: '0px' //主面板相对浏览器右侧距离
-	    ,minRight: '0px' //聊天面板最小化时相对浏览器右侧距离
-	    ,initSkin: '3.jpg' //1-5 设置初始背景
-	    // ,skin: ['aaa.jpg'] //新增皮肤
-	    ,isfriend: true //是否开启好友
-	    ,isgroup: true //是否开启群组
-	    ,min: false //是否始终最小化主面板，默认false
-	    ,notice: true //是否开启桌面消息提醒，默认false
-	    ,voice: 'default.mp3' //声音提醒，默认开启，声音文件为：default.mp3
+	    // // 是否简约模式（若开启则不显示主面板）
+		// ,brief: false
+	    // // 自定义主面板最小化时的标题
+	    // ,title: 'WebIM'
+		// ,right: '0px' //主面板相对浏览器右侧距离
+	    // ,minRight: '0px' //聊天面板最小化时相对浏览器右侧距离
+	    // ,initSkin: '3.jpg' //1-5 设置初始背景
+	    // // ,skin: ['aaa.jpg'] //新增皮肤
+	    // ,isfriend: true //是否开启好友
+	    // ,isgroup: true //是否开启群组
+	    // ,min: false //是否始终最小化主面板，默认false
+	    // ,notice: true //是否开启桌面消息提醒，默认false
+	    // ,voice: 'default.mp3' //声音提醒，默认开启，声音文件为：default.mp3
 
         ,msgbox: layui.cache.dir + 'css/modules/layim/html/msgbox.html' //消息盒子页面地址，若不开启，剔除该项即可
 
@@ -121,51 +195,152 @@ layui.use(['layim', 'jquery'], function(layim){
 
 	// 当你的WebSocket监听到有好友或者群新增时，需让LayIM的主面板同步添加的信息
 	layim.on('ready', function(res){
+		u = layim.cache();
+		// console.log($('#user').find('img').attr('src'));
+		// console.log(u.mine.avatar);
+		$('#user').find('img').attr('src', u.mine.avatar);
+		$('#username').text(u.mine.username);
+		$('#logout').attr('href', '/login/logout/?user_id='+u.mine.id);
+		$('#user_info').attr('href', '/chat/user_info/?user_id='+u.mine.id);
+
 		// 监听收到的聊天消息
-		goEasy.subscribe({
-			channel: user_id,
-			onMessage: function(res){
-				let content = JSON.parse(res.content);
-				console.log(typeof content);
-				console.log(content);
-				if (content.type === 'msg'  && content.msg.fromid !== user_id){
-					layim.getMessage(content.msg);
-				}
-				else if(content.type === 'addList'){
-					// 添加好友/群到主面板
-					layim.addList(content.msg);
-				}
-				else if(content.type === 'removeList'){
-					// 从主面板移除好友/群
-					layim.removeList({
-						type: 'friend' //或者group
-						,id: 1238668 //好友或者群组ID
-					})
+		let prefix = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+		let chatSocket = new WebSocket(prefix +  window.location.host + '/ws/chat/' + user_id + '/');
+
+		chatSocket.onmessage = function(res) {
+			console.log(typeof res);
+			console.log(res.data);
+			// console.log(res['message']);
+		    let content = JSON.parse(res.data).message;
+		    // console.log(content.message);
+			// console.log(typeof content);
+			// console.log(content);
+			console.log(content.channel_type);
+			if (content.channel_type === 'msg'  && content.msg.fromid !== user_id){
+				layim.getMessage(content.msg);
+			}
+			// 监听该用户被添加为好友的消息，即好友申请消息
+			else if (content.channel_type === 'be_added_as_a_friend') {
+				if (content.msg.type === 'friend') {
+					layim.setFriendGroup({
+						type: 'friend'
+						,username: content.msg.username //好友昵称，若申请加群，参数为：groupname
+						,avatar: content.msg.avatar //头像
+						,group: layim.cache().friend //获取好友列表数据
+						,submit: function(group, index){
+							$.ajax({
+								url: '/chat/add_friend/',
+								type: 'post',
+								data: {
+									res_type: 'pass',
+									user_id: content.msg.from_user_id,
+									friend_id: user_id,
+									a_group_id: content.msg.to_group_id,
+									b_group_id: group,
+								},
+								success: function(data){
+									// 同意后，将好友追加到主面板
+									layim.addList(data);
+									// 关闭改面板
+									layer.close(index);
+								}
+							});
+						}
+					});
+				} else if (content.msg.type === 'group') {
+					layim.setFriendGroup({
+						type: 'group'
+						,groupname: 'xxx' //好友昵称，若申请加群，参数为：groupname
+						,avatar: 'a.jpg' //头像
+						,group: layim.cache().friend //获取好友列表数据
+						,submit: function(group, index){
+							//一般在此执行Ajax和WS，以通知对方已经同意申请
+							//……
+
+							//同意后，将好友追加到主面板
+							layim.addList(data); //见下文
+						}
+					});
 				}
 			}
-		});
+			// 监听当前用户好友申请通过的消息
+			// 如果被拒绝也可以通知该用户
+			else if (content.channel_type === 'friend_result') {
+				if (content.type === 'pass') {
+					layim.addList(content.msg);
+					layer.msg('好友申请已通过')
+				} else {
+					layer.msg('好友申请被拒绝')
+				}
+			}
+		};
+
+		chatSocket.onclose = function(e) {
+		    console.error('Chat socket closed unexpectedly');
+		};
+		// goEasy.subscribe({
+		// 	channel: user_id,
+		// 	onMessage: function(res){
+		// 		let content = JSON.parse(res.content);
+		// 		console.log(typeof content);
+		// 		console.log(content);
+		// 		if (content.type === 'msg'  && content.msg.fromid !== user_id){
+		// 			layim.getMessage(content.msg);
+		// 		}
+		// 		else if(content.type === 'apply_group_chat'){
+		// 			// 添加好友/群到主面板
+		// 			console.log(content.msg);
+		// 			layim.addList(content.msg)
+		// 		}
+		// 		else if(content.type === 'removeList'){
+		// 			// 从主面板移除好友/群
+		// 			layim.removeList({
+		// 				type: 'friend' //或者group
+		// 				,id: 1238668 //好友或者群组ID
+		// 			})
+		// 		}
+		// 	}
+		// });
 		// 首先获取所有群聊的ID
 		let groups = layim.cache().group;
+		let nodes = {};
 		for (let i = 0; i < groups.length; i++) {
-			goEasy.subscribe({
-				channel: groups[i].id,
-				onMessage: function(res){
-					let content = JSON.parse(res.content);
-					console.log(typeof content);
-					console.log(content);
-					if (content.type === 'msg' && content.msg.fromid !== user_id){
+			// goEasy.subscribe({
+			// 	channel: groups[i].id,
+			// 	onMessage: function(res){
+			// 		let content = JSON.parse(res.content);
+			// 		console.log(typeof content);
+			// 		console.log(content);
+			// 		if (content.type === 'msg' && content.msg.fromid !== user_id){
+			//
+			// 			console.log(content.msg);
+			// 			layim.getMessage(content.msg);
+			// 		}
+			// 	}
+			// 	,onSuccess: function () {
+			// 		console.log('订阅成功')
+			// 	}
+			// 	,onFailed: function (error) {
+			// 		layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
+			// 	}
+			// });
+            nodes['chatSocket'+i] = new WebSocket(prefix +  window.location.host + '/ws/chat/' + groups[i].id + '/');
 
-						console.log(content.msg);
-						layim.getMessage(content.msg);
-					}
+			nodes['chatSocket'+i].onmessage = function(res) {
+				console.log(typeof res);
+				// let content = JSON.parse(res.content);
+				let content = JSON.parse(res.data).message;
+				console.log(typeof content);
+				console.log(content);
+				if (content.channel_type === 'msg' && content.msg.fromid !== user_id){
+					console.log(content.msg);
+					layim.getMessage(content.msg);
 				}
-				,onSuccess: function () {
-					console.log('订阅成功')
-				}
-				,onFailed: function (error) {
-					layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
-				}
-			});
+			};
+
+			nodes['chatSocket'+i].onclose = function(e) {
+			    console.error('Chat socket closed unexpectedly');
+			};
 		}
 	});
 
@@ -214,94 +389,94 @@ layui.use(['layim', 'jquery'], function(layim){
 	});
 
 	// 监听该用户被添加为好友的消息，即好友申请消息
-	goEasy.subscribe({
-		channel: user_id + 'be_added_as_a_friend'
-		,onMessage: function(res){
-			let content = JSON.parse(res.content);
-			console.log(typeof content);
-			console.log(content);
-			if (content.type === 'friend') {
-				layim.setFriendGroup({
-					type: 'friend'
-					,username: content.msg.username //好友昵称，若申请加群，参数为：groupname
-					,avatar: content.msg.avatar //头像
-					,group: layim.cache().friend //获取好友列表数据
-					,submit: function(group, index){
-						$.ajax({
-							url: '/chat/add_friend/',
-							type: 'post',
-							data: {
-								res_type: 'pass',
-								user_id: content.msg.from_user_id,
-								friend_id: user_id,
-								a_group_id: content.msg.to_group_id,
-								b_group_id: group,
-							},
-							success: function(data){
-								// 同意后，将好友追加到主面板
-								layim.addList(data);
-								// 关闭改面板
-								layer.close(index);
-							}
-						});
-					}
-				});
-			} else if (content.type === 'group') {
-				layim.setFriendGroup({
-					type: 'group'
-					,groupname: 'xxx' //好友昵称，若申请加群，参数为：groupname
-					,avatar: 'a.jpg' //头像
-					,group: layim.cache().friend //获取好友列表数据
-					,submit: function(group, index){
-						//一般在此执行Ajax和WS，以通知对方已经同意申请
-						//……
-
-						//同意后，将好友追加到主面板
-						layim.addList(data); //见下文
-					}
-				});
-			}
-		}
-		,onSuccess: function () {
-			console.log('订阅成功')
-		}
-		,onFailed: function (error) {
-			layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
-		}
-	});
+	// goEasy.subscribe({
+	// 	channel: user_id + 'be_added_as_a_friend'
+	// 	,onMessage: function(res){
+	// 		let content = JSON.parse(res.content);
+	// 		console.log(typeof content);
+	// 		console.log(content);
+	// 		if (content.type === 'friend') {
+	// 			layim.setFriendGroup({
+	// 				type: 'friend'
+	// 				,username: content.msg.username //好友昵称，若申请加群，参数为：groupname
+	// 				,avatar: content.msg.avatar //头像
+	// 				,group: layim.cache().friend //获取好友列表数据
+	// 				,submit: function(group, index){
+	// 					$.ajax({
+	// 						url: '/chat/add_friend/',
+	// 						type: 'post',
+	// 						data: {
+	// 							res_type: 'pass',
+	// 							user_id: content.msg.from_user_id,
+	// 							friend_id: user_id,
+	// 							a_group_id: content.msg.to_group_id,
+	// 							b_group_id: group,
+	// 						},
+	// 						success: function(data){
+	// 							// 同意后，将好友追加到主面板
+	// 							layim.addList(data);
+	// 							// 关闭改面板
+	// 							layer.close(index);
+	// 						}
+	// 					});
+	// 				}
+	// 			});
+	// 		} else if (content.type === 'group') {
+	// 			layim.setFriendGroup({
+	// 				type: 'group'
+	// 				,groupname: 'xxx' //好友昵称，若申请加群，参数为：groupname
+	// 				,avatar: 'a.jpg' //头像
+	// 				,group: layim.cache().friend //获取好友列表数据
+	// 				,submit: function(group, index){
+	// 					//一般在此执行Ajax和WS，以通知对方已经同意申请
+	// 					//……
+	//
+	// 					//同意后，将好友追加到主面板
+	// 					layim.addList(data); //见下文
+	// 				}
+	// 			});
+	// 		}
+	// 	}
+	// 	,onSuccess: function () {
+	// 		console.log('订阅成功')
+	// 	}
+	// 	,onFailed: function (error) {
+	// 		layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
+	// 	}
+	// });
 
 	// 监听当前用户好友申请通过的消息
 	// 如果被拒绝也可以通知该用户
-	goEasy.subscribe({
-		channel: user_id + 'friend_result'
-		,onMessage: function(res){
-			console.log(typeof res);
-			// let content = JSON.parse(res);
-			let content = JSON.parse(res.content);
-			console.log(content);
-			if (content.type === 'pass') {
-				layim.addList(content.msg);
-				layer.msg('好友申请已通过')
-			} else {
-				layer.msg('好友申请被拒绝')
-			}
-		}
-		,onSuccess: function () {
-			console.log('订阅成功')
-		}
-		,onFailed: function (error) {
-			layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
-		}
-	});
+	// goEasy.subscribe({
+	// 	channel: user_id + 'friend_result'
+	// 	,onMessage: function(res){
+	// 		console.log(typeof res);
+	// 		// let content = JSON.parse(res);
+	// 		let content = JSON.parse(res.content);
+	// 		console.log(content);
+	// 		if (content.type === 'pass') {
+	// 			layim.addList(content.msg);
+	// 			layer.msg('好友申请已通过')
+	// 		} else {
+	// 			layer.msg('好友申请被拒绝')
+	// 		}
+	// 	}
+	// 	,onSuccess: function () {
+	// 		console.log('订阅成功')
+	// 	}
+	// 	,onFailed: function (error) {
+	// 		layer.msg('订阅失败，错误编码：' + error.code + ' 错误信息：' + error.content, {icon: 2});
+	// 	}
+	// });
 
 	// 面板外的操作
 	var active = {
 		// 添加群聊
-		addGroup: function(){
-			layer.prompt(function(val, index){
+		addGroupChat: function(){
+			layer.prompt({title: '输入群聊名称，并确认', formType: 3}, function(val, index){
 				// layer.msg('得到了'+val);
 				$.ajax({
-					url: '/chat/add_group/',
+					url: '/chat/add_group_chat/',
 					type: 'post',
 					data: {
 						user_id: user_id,
@@ -329,14 +504,14 @@ layui.use(['layim', 'jquery'], function(layim){
 			});
 		}
 		,removeFriend: function(){
-		layer.msg('已成功删除[凤姐]', {
-		icon: 1
+			layer.msg('已成功删除[凤姐]', {
+			icon: 1
 		});
 		//删除一个好友
 		layim.removeList({
-		id: 121286
-		,type: 'friend'
-		});
+			id: 121286
+			,type: 'friend'
+			});
 		}
 		,removeGroup: function(){
 			layer.msg('已成功删除[前端群]', {
@@ -348,18 +523,27 @@ layui.use(['layim', 'jquery'], function(layim){
 				,type: 'group'
 			});
 		}
-		//置灰离线好友
-		,setGray: function(){
-			layim.setFriendStatus(168168, 'offline');
-				layer.msg('已成功将好友[马小云]置灰', {
-				icon: 1
-			});
-		}
-		//取消好友置灰
-		,unGray: function(){
-			layim.setFriendStatus(168168, 'online');
-				layer.msg('成功取消好友[马小云]置灰状态', {
-				icon: 1
+		,addGroup: function () {
+			layer.prompt({title: '输入分组名称，并确认', formType: 3}, function(val, index){
+				// layer.msg('得到了'+val);
+				$.ajax({
+					url: '/chat/add_group/',
+					type: 'post',
+					data: {
+						user_id: user_id,
+						group_name: val,
+						// group_chat_avatar: '',
+					},
+					success: function (res) {
+						console.log(typeof res);
+						console.log(res);
+						if (res.code !== 0){
+							layer.msg(res.msg, {icon: 1});
+						}
+						layer.close(index);
+						// layer.msg('已成功把['+ val +']添加到群组里', {icon: 1});
+					}
+				});
 			});
 		}
 	};

@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from chat.models import User, Group
+from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
 def do_login(request):
 	'''
 	执行登录逻辑，登录成功跳往聊天界面
@@ -21,7 +23,12 @@ def do_login(request):
 		if user.count() == 1:
 			# 查询好友，群组，历史记录
 			# login(request, user)
+			# todo
 			print('已登录')
+			print(user[0].status)
+			user[0].status = 'ON'
+			print(user[0].status)
+			user[0].save()
 			return JsonResponse({'code': 0, 'status': True, 'info': '登录成功', 'user_id': user[0].id})
 			# return render(request, 'chat.html', context={'user_id': user[0].id})
 			# return HttpResponseRedirect(reverse('chat_home'))
@@ -32,6 +39,7 @@ def do_login(request):
 	return render(request, 'login.html')
 
 
+@csrf_exempt
 def signin(request):
 	'''
 	用户注册
@@ -80,3 +88,13 @@ def signup(request):
 	:return:
 	'''
 	return render(request, 'signup.html', {})
+
+
+def logout(request):
+	user_id = request.GET.get('user_id', None)
+	if not user_id:
+		return JsonResponse({'code': 0, 'msg': 'invalid user_id'})
+	user = User.objects.get(pk=user_id)
+	user.status = 'OFF'
+	user.save()
+	return render(request, 'login.html')

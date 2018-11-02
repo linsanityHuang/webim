@@ -14,3 +14,9 @@
 var goEasy = new GoEasy({
 		appkey: 'BS-106b3947c7304a238d8b5ef8105f1cd0'
 	});
+
+
+function create_socket(channel) {
+	let prefix = (window.location.protocol === 'http') ? 'ws://' : 'wss://' +  window.location.host + '/ws/chat/'+channel +'/';
+	return new WebSocket(prefix);
+}

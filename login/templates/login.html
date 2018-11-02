@@ -16,9 +16,7 @@
 {% endblock %}
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <body>
-<!--<i class="layui-icon layui-icon-dialogue"></i>-->
 <form class="layui-form" action="">
-  {% csrf_token %}
   <div class="layui-form-item">
     <label class="layui-form-label">用户名</label>
     <div class="layui-input-block">
@@ -61,8 +59,8 @@ layui.use(['form', 'jquery'], function(){
 	            	alert('登录失败')
 	            }
             },
-        })
-	    // return false;
+        });
+	    return false;
     });
 });
 

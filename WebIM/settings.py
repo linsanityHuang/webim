@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-	# 'channels',
+	'channels',
 	'login',
 	'chat',
 	'django.contrib.admin',
@@ -73,15 +73,15 @@ WSGI_APPLICATION = 'WebIM.wsgi.application'
 
 
 # Channels
-# ASGI_APPLICATION = 'WebIM.routing.application'
-# CHANNEL_LAYERS = {
-# 	'default': {
-# 		'BACKEND': 'channels_redis.core.RedisChannelLayer',
-# 		'CONFIG': {
-# 			"hosts": [('127.0.0.1', 6379)],
-# 		},
-# 	},
-# }
+ASGI_APPLICATION = 'WebIM.routing.application'
+CHANNEL_LAYERS = {
+	'default': {
+		'BACKEND': 'channels_redis.core.RedisChannelLayer',
+		'CONFIG': {
+			"hosts": [('127.0.0.1', 6379)],
+		},
+	},
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

@@ -6,6 +6,8 @@ __pycache__/
 .idea/
 # C extensions
 *.so
+chat/migrations/
+login/migrations/
 
 # Distribution / packaging
 .Python
