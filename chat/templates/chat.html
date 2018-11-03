@@ -84,7 +84,6 @@
 {% block script %}
     <script src="{% static 'dist/layui.js' %}"></script>
 	<script src="{% static 'js/utils.js' %}"></script>
-	<script src="{% static 'js/socket.js'%}"></script>
 {% endblock %}
 <script>
 var u = null;
@@ -130,7 +129,7 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
           ,icon: '&#xe64e;' //工具图标，参考图标文档
         }]
 
-        // ,msgbox: layui.cache.dir + 'css/modules/layim/html/msgbox.html' //消息盒子页面地址，若不开启，剔除该项即可
+        ,msgbox: layui.cache.dir + 'css/modules/layim/html/msgbox.html' //消息盒子页面地址，若不开启，剔除该项即可
 
         ,find: layui.cache.dir + 'css/modules/layim/html/find.html?user_id='+ user_id//发现页面地址，若不开启，剔除该项即可
 
@@ -178,6 +177,11 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 
 	// 当你的WebSocket监听到有好友或者群新增时，需让LayIM的主面板同步添加的信息
 	layim.on('ready', function(res){
+
+		// 数字即为你通过websocket或者Ajax实时获取到的最新消息数量
+		// 它将在主面板的消息盒子icon上不断显隐提示，直到点击后自动消失
+		layim.msgbox(5);
+
 		u = layim.cache();
 		$('#user').find('img').attr('src', u.mine.avatar);
 		$('#username').text(u.mine.username);
@@ -249,6 +253,9 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 				} else {
 					layer.msg('好友申请被拒绝')
 				}
+			}
+			else if (content.channel_type === 'apply_group_chat') {
+				console.log('通知管理员')
 			}
 		};
 

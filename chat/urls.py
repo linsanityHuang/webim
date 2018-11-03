@@ -4,8 +4,6 @@ from django.conf.urls import url
 
 
 urlpatterns = [
-	# url(r'^$', views.index, name='index'),
-	# url(r'^(?P<room_name>[^/]+)/$', views.room, name='room'),
 	url(r'^msg_gateway/$', views.msg_gateway),
 	url(r'^chat_home/$', views.home, name='chat_home'),
 	url(r'^init/$', views.init_user, name='init'),
@@ -22,4 +20,5 @@ urlpatterns = [
 	url(r'^add_group/$', views.add_group, name='add_group'),
 	url(r'^user_info/$', views.user_info, name='user_info'),
 	url(r'^upload_avatar/$', views.upload_avatar, name='upload_avatar'),
+	url(r'^history_msg/$', views.history_msg, name='history_msg'),
 ]

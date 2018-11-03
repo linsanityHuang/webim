@@ -64,6 +64,8 @@ channel_layer = get_channel_layer()
 
 
 def channel_publish(topic, content):
+	print(topic)
+	print(content)
 	try:
 		'''
 		type需要与consumer中的receive中一致

@@ -72,11 +72,19 @@ class GroupChat(models.Model):
 	
 class Message(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	from_user = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='msg_from_user')
-	to_user = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='msg_to_user')
+	from_user_id = models.CharField(max_length=255)
+	from_user_name = models.CharField(max_length=255)
+	from_user_avatar = models.CharField(max_length=255)
+	to_user_or_group_id = models.CharField(max_length=255)
+	# from_user = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='msg_from_user')
+	# to_user = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='msg_to_user')
+	# 消息来自私聊还是群聊
+	# friend 私聊 group 群聊
+	channel_type = models.CharField(max_length=32, default='friend')
 	# 0 文本; 1 图片; 2 视频; 3语音
 	msg_type = models.IntegerField(default=0)
 	content = models.CharField(max_length=255)
+	timestamp = models.BigIntegerField()
 	
 
 class ImageModel(models.Model):

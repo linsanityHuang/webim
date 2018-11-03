@@ -1,31 +1,12 @@
 # chat/views.py
 import time
-import json
 import uuid
 import datetime
-from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from chat.models import User, Group, GroupChat, ImageModel, FileModel
+from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
-
-res = {
-		'code': -1,
-		'msg': '',
-		'data': {
-		}
-	}
-
-
-def index(request):
-	return render(request, 'chat/index.html', {})
-
-
-def room(request, room_name):
-	return render(request, 'chat/room.html', {
-		'room_name_json': mark_safe(json.dumps(room_name))
-	})
 
 
 def home(request):
@@ -62,6 +43,7 @@ def msg_gateway(request):
 		# 如果是私聊消息则是from_user_id
 		id_ = from_user_id
 		mine = False
+		timestamp = int(time.time() * 1000)
 		if 'group' == user_type:
 			id_ = to_user_id
 			# mine = True
@@ -80,15 +62,72 @@ def msg_gateway(request):
 			'mine': mine,
 			# 消息的发送者id（比如群组中的某个消息发送者），可用于自动解决浏览器多窗口时的一些问题
 			'fromid': from_user_id,
-			'timestamp': int(time.time() * 1000),
+			'timestamp': timestamp,
 		}
+		Message.objects.create(
+			from_user_id=from_user_id,
+			from_user_name=from_user_name,
+			from_user_avatar=from_user_avatar,
+			to_user_or_group_id=to_user_id,
+			channel_type=user_type,
+			content=content,
+			timestamp=timestamp,
+		)
 		content = {
 			'channel_type': 'msg',
 			'msg': msg,
 		}
 		channel_publish(to_user_id, content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '消息发送成功'})
+	
 
+@csrf_exempt
+def history_msg(request):
+	'''
+	获取聊天记录
+	id=bc050bc4-a124-4aa7-a267-cc2a6803169e&type=group
+	:param request:
+	:return:
+	'''
+	res = dict()
+	type = request.GET.get('type', None)
+	# 好友ID或群聊ID
+	id = request.GET.get('id', None)
+	# 当前用户ID
+	user_id = request.GET.get('user_id', None)
+	if 'friend' == type:
+		# 好友发送给当前用户的消息
+		# 当前用户发送给好友的消息
+		# msg1 = Message.objects.filter(from_user_id=user_id, to_user_or_group_id=id)
+		data = [
+			{
+				'username': msg.from_user_name,
+				'id': msg.id,
+				'avatar': msg.from_user_avatar,
+				'timestamp': msg.timestamp,
+				'content': msg.content,
+			}
+			for msg in Message.objects.filter(from_user_id__in=[id, user_id], to_user_or_group_id__in=[id, user_id]).order_by('timestamp')
+		]
+		res['code'] = 0
+		res['msg'] = ''
+		res['data'] = data
+		return JsonResponse(res)
+	else:
+		data = [
+			{
+				'username': msg.from_user_name,
+				'id': msg.id,
+				'avatar': msg.from_user_avatar,
+				'timestamp': msg.timestamp,
+				'content': msg.content,
+			}
+			for msg in Message.objects.filter(to_user_or_group_id=id)
+		]
+		res['code'] = 0
+		res['data'] = data
+		return JsonResponse(res)
+	
 
 def init_user(request):
 	'''
@@ -229,7 +268,6 @@ def add_friend(request):
 				# 'sign': user.signature,
 			},
 		}
-		# publish(b_friend_id, json.dumps(content))
 		channel_publish(b_friend_id, content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '好友申请已发送'})
 	# 用户B同意用户A的好友申请
@@ -276,7 +314,6 @@ def add_friend(request):
 				'sign': user.signature,
 			},
 		}
-		# publish('%sfriend_result' % user_id, json.dumps(a_content))
 		channel_publish(user_id, a_content)
 		return JsonResponse(b_content['msg'])
 	
@@ -298,7 +335,7 @@ def apply_group_chat(request):
 		group_chat = GroupChat.objects.get(pk=group_chat_id)
 		admins = group_chat.group_admins.all()
 		content = {
-			'type': 'add_group_chat',
+			'channel_type': 'apply_group_chat',
 			'msg': {
 				'type': 'group',
 				'username': user.username,
@@ -310,7 +347,7 @@ def apply_group_chat(request):
 		}
 		print('发送消息')
 		for admin in admins:
-			channel_publish(admin.id, content)
+			channel_publish(str(admin.id), content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '申请已发送'})
 		
 
@@ -330,6 +367,7 @@ def search_friend(request):
 	if request.method == 'POST':
 		key_word = request.POST.get('key_word', None)
 		search_type = request.POST.get('search_type', None)
+		user_id = request.POST.get('user_id', None)
 		if not key_word or not search_type:
 			res['code'] = -1
 			res['msg'] = 'invalid parameters'
@@ -344,7 +382,7 @@ def search_friend(request):
 					'sign': user.signature,
 					'avatar': user.avatar
 				}
-				for user in User.objects.filter(username__icontains=key_word)
+				for user in User.objects.filter(username__icontains=key_word) if str(user.id) != user_id
 			]
 			res['count'] = len(result)
 			res['data'] = result
@@ -369,6 +407,12 @@ def upload_image(request):
 	:param request:
 	:return:
 	'''
+	res = {
+		'code': -1,
+		'msg': '',
+		'data': {
+		}
+	}
 	if request.method == 'POST':
 		pic = request.FILES.get('file')
 		pic.name = str(uuid.uuid4()) + pic.name
@@ -391,6 +435,12 @@ def upload_avatar(request):
 	:param request:
 	:return:
 	'''
+	res = {
+		'code': -1,
+		'msg': '',
+		'data': {
+		}
+	}
 	if request.method == 'POST':
 		user_id = request.GET.get('user_id', None)
 		pic = request.FILES.get('file')
@@ -415,6 +465,12 @@ def upload_file(request):
 	:param request:
 	:return:
 	'''
+	res = {
+		'code': -1,
+		'msg': '',
+		'data': {
+		}
+	}
 	if request.method == 'POST':
 		file_ = request.FILES.get('file')
 		file_.name = str(uuid.uuid4()) + file_.name
