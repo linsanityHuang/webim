@@ -34,9 +34,9 @@ def do_login(request):
 			# return HttpResponseRedirect(reverse('chat_home'))
 		else:
 			print('用户不存在')
-			return render(request, 'login.html', {'username': username, 'password': password})
+			return render(request, 'login/login.html', {'username': username, 'password': password})
 	print('do_login get')
-	return render(request, 'login.html')
+	return render(request, 'login/login.html')
 
 
 @csrf_exempt
@@ -87,7 +87,7 @@ def signup(request):
 	:param request:
 	:return:
 	'''
-	return render(request, 'signup.html', {})
+	return render(request, 'login/signup.html', {})
 
 
 def logout(request):
@@ -97,4 +97,4 @@ def logout(request):
 	user = User.objects.get(pk=user_id)
 	user.status = 'OFF'
 	user.save()
-	return render(request, 'login.html')
+	return render(request, 'login/login.html')

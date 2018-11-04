@@ -13,8 +13,8 @@ def home(request):
 	user_id = request.GET.get('user_id', None)
 	if user_id is not None:
 		user = User.objects.get(id=user_id)
-		return render(request, 'chat.html', {'id': user_id})
-	return render(request, 'chat.html', {'user_id': user_id})
+		return render(request, 'chat/chat.html', {'id': user_id})
+	return render(request, 'chat/chat.html', {'user_id': user_id})
 
 
 @csrf_exempt
@@ -177,7 +177,7 @@ def init_user(request):
 			'list': friend_list,
 		}
 		friends.append(group_friends)
-	print(friends)
+	# print(friends)
 	# 好友列表
 	res['data']['friend'] = friends
 	
@@ -250,10 +250,10 @@ def add_friend(request):
 		to_group_id = request.POST.get('to_group_id', None)
 		# 好友申请信息
 		remark = request.POST.get('remark', None)
-		print('用户A的ID', a_user_id)
+		# print('用户A的ID', a_user_id)
 		user = User.objects.get(pk=a_user_id)
 		friend = User.objects.get(pk=b_friend_id)
-		print('%s要添加%s为好友' % (user.username, friend.username))
+		# print('%s要添加%s为好友' % (user.username, friend.username))
 		# 向用户B发送好友申请
 		content = {
 			'channel_type': 'be_added_as_a_friend',
@@ -288,7 +288,7 @@ def add_friend(request):
 		a_group.group_members.add(friend)
 		b_group = Group.objects.get(pk=b_group_id)
 		b_group.group_members.add(user)
-		print('%s同意了%s的好友申请' % (friend.username, user.username))
+		# print('%s同意了%s的好友申请' % (friend.username, user.username))
 		# 向用户A通知申请通过
 		a_content = {
 			'channel_type': 'friend_result',
@@ -345,7 +345,7 @@ def apply_group_chat(request):
 				'sign': user.signature
 			},
 		}
-		print('发送消息')
+		# print('发送消息')
 		for admin in admins:
 			channel_publish(str(admin.id), content)
 		return JsonResponse({'code': 0, 'status': True, 'info': '申请已发送'})
@@ -418,11 +418,11 @@ def upload_image(request):
 		pic.name = str(uuid.uuid4()) + pic.name
 		image = ImageModel.objects.create(model_pic=pic)
 		# qiniu_upload(pic)
-		print(image.model_pic.name)
+		# print(image.model_pic.name)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
-		print(res)
+		# print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
@@ -452,7 +452,7 @@ def upload_avatar(request):
 		user = User.objects.get(pk=user_id)
 		user.avatar = res['data']['src']
 		user.save()
-		print(res)
+		# print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
@@ -476,11 +476,11 @@ def upload_file(request):
 		file_.name = str(uuid.uuid4()) + file_.name
 		file_model = FileModel.objects.create(model_file=file_)
 		# qiniu_upload(pic)
-		print(file_model.model_file.name)
+		# print(file_model.model_file.name)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, file_.name)
-		print(res)
+		# print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
@@ -496,8 +496,8 @@ def modify_sign(request):
 	if request.method == 'POST':
 		sign = request.POST.get('sign', None)
 		user_id = request.POST.get('id', None)
-		print('sign', sign)
-		print('user_id', user_id)
+		# print('sign', sign)
+		# print('user_id', user_id)
 		if sign and user_id:
 			user = User.objects.get(pk=user_id)
 			user.signature = sign
@@ -516,8 +516,8 @@ def modify_status(request):
 	if request.method == 'POST':
 		status = request.POST.get('status', None)
 		user_id = request.POST.get('id', None)
-		print('sign', status)
-		print('user_id', user_id)
+		# print('sign', status)
+		# print('user_id', user_id)
 		if status and user_id:
 			user = User.objects.get(pk=user_id)
 			user.status = 'ON' if status == 'online' else 'OFF'
@@ -583,8 +583,8 @@ def user_info(request):
 		user_id = request.GET.get('user_id', None)
 		if user_id:
 			user = User.objects.get(pk=user_id)
-			return render(request, 'user_info.html', context={'user': user})
-		return render(request, 'user_info.html')
+			return render(request, 'chat/user_info.html', context={'user': user})
+		return render(request, 'chat/user_info.html')
 	else:
 		signature = request.POST.get('signature', None)
 		email = request.POST.get('email', None)
