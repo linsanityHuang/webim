@@ -61,11 +61,10 @@ layui.use(['form', 'jquery'], function(){
         });
 	    return false;
     });
+    $('#signup').on('click', function () {
+		location.href = '/login/signup/'
+	})
 });
-
-$('#signup').on('click', function () {
-	location.href = '/login/signup/'
-})
 </script>
 </body>
 </html>
