@@ -80,7 +80,6 @@
     © layui.com
   </div>
 </div>
-<script type="text/javascript" src="http://cdn-hangzhou.goeasy.io/goeasy.js"></script>
 {% block script %}
     <script src="{% static 'dist/layui.js' %}"></script>
 	<script src="{% static 'js/utils.js' %}"></script>
@@ -189,8 +188,8 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 		$('#user_info').attr('href', '/chat/user_info/?user_id='+u.mine.id);
 
 		// 监听收到的聊天消息
-		let prefix = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-		let chatSocket = new WebSocket(prefix +  window.location.host + '/ws/chat/' + user_id + '/');
+		let prefix = window.location.protocol === 'http:' ? 'ws' : 'wss';
+		let chatSocket = new WebSocket(prefix + '://' + window.location.host + '/'+ prefix +'/chat/' + user_id + '/');
 
 		chatSocket.onmessage = function(res) {
 			// console.log(typeof res);
@@ -266,7 +265,7 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 		let groups = layim.cache().group;
 		let nodes = {};
 		for (let i = 0; i < groups.length; i++) {
-            nodes['chatSocket'+i] = new WebSocket(prefix +  window.location.host + '/ws/chat/' + groups[i].id + '/');
+            nodes['chatSocket'+i] = new WebSocket(prefix + '://' + window.location.host + '/'+ prefix +'/chat/' + groups[i].id + '/');
 
 			nodes['chatSocket'+i].onmessage = function(res) {
 				// console.log(typeof res);
