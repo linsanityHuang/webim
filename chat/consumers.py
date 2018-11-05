@@ -2,6 +2,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from .models import Group
 import json
 
 
@@ -20,12 +21,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
-
+		# 通知好友用户上线
+		# 找到该用户的所有好友，发送通知
+		# 查询用户的好友分组
+		# groups = Group.objects.filter(owner=self.room_group_name)
+		# for item in groups:
+		# 	for friend in item.group_members.all():
+		# 		channel_publish(friend.id, {'channel_type': 'friend_on', 'user_id': self.room_group_name})
 		await self.accept()
 	
 	# 断开链接是触发该函数
 	async def disconnect(self, close_code):
 		# Leave room group
+		# groups = Group.objects.filter(owner=self.room_group_name)
+		# for item in groups:
+		# 	for friend in item.group_members.all():
+		# 		channel_publish(friend.id, {'channel_type': 'friend_off', 'user_id': self.room_group_name})
 		await self.channel_layer.group_discard(
 			self.room_group_name,
 			self.channel_name
@@ -64,8 +75,8 @@ channel_layer = get_channel_layer()
 
 
 def channel_publish(topic, content):
-	print(topic)
-	print(content)
+	# print(topic)
+	# print(content)
 	try:
 		'''
 		type需要与consumer中的receive中一致

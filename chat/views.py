@@ -10,7 +10,7 @@ from chat.consumers import channel_publish
 from WebIM.settings import Domain
 import sys
 import codecs
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
 def home(request):
@@ -419,7 +419,7 @@ def upload_image(request):
 	}
 	if request.method == 'POST':
 		pic = request.FILES.get('file')
-		pic.name = str(uuid.uuid4()) + pic.name
+		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
 		image = ImageModel.objects.create(model_pic=pic)
 		# qiniu_upload(pic)
 		# print(image.model_pic.name)
@@ -448,7 +448,7 @@ def upload_avatar(request):
 	if request.method == 'POST':
 		user_id = request.GET.get('user_id', None)
 		pic = request.FILES.get('file')
-		pic.name = str(uuid.uuid4()) + pic.name.rsplit('.', 1)[1]
+		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
 		image = ImageModel.objects.create(model_pic=pic)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
@@ -477,7 +477,7 @@ def upload_file(request):
 	}
 	if request.method == 'POST':
 		file_ = request.FILES.get('file')
-		file_.name = str(uuid.uuid4()) + file_.name
+		file_.name = str(uuid.uuid4()) + '.' + file_.name.rsplit('.', 1)[1]
 		file_model = FileModel.objects.create(model_file=file_)
 		# qiniu_upload(pic)
 		# print(file_model.model_file.name)

@@ -256,6 +256,14 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 			else if (content.channel_type === 'apply_group_chat') {
 				console.log('通知管理员')
 			}
+			else if (content.channel_type === 'friend_on') {
+				// 设置指定好友在线，即头像置灰
+				layim.setFriendStatus(content.user_id, 'online');
+			}
+			else if (content.channel_type === 'friend_off') {
+				// 设置指定好友在线，即头像取消置灰
+				layim.setFriendStatus(content.user_id, 'offline');
+			}
 		};
 
 		chatSocket.onclose = function(e) {
