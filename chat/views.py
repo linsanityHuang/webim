@@ -7,6 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
+import sys
+import codecs
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
 def home(request):
