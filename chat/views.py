@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
+from WebIM.settings import Domain
 import sys
 import codecs
 sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
@@ -424,7 +425,7 @@ def upload_image(request):
 		# print(image.model_pic.name)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
+		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
 		# print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'
@@ -451,7 +452,7 @@ def upload_avatar(request):
 		image = ImageModel.objects.create(model_pic=pic)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, pic.name)
+		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
 		user = User.objects.get(pk=user_id)
 		user.avatar = res['data']['src']
 		user.save()
@@ -482,7 +483,7 @@ def upload_file(request):
 		# print(file_model.model_file.name)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % ('http://127.0.0.1:8000', date, file_.name)
+		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, file_.name)
 		# print(res)
 		return JsonResponse(res)
 	res['msg'] = '上传文件失败'

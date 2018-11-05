@@ -106,6 +106,7 @@ def mysql_settings():
 DATABASES = {
 	'default': mysql_settings()
 }
+Domain = 'https://iwantme.cn'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
