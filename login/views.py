@@ -15,27 +15,27 @@ def do_login(request):
 		# print('do_login post')
 		username = request.POST.get('username', None)
 		password = request.POST.get('password', None)
-		print('username', username)
-		print('password', password)
+		# print('username', username)
+		# print('password', password)
 		# user = authenticate(request, username=username, password=password)
 		user = User.objects.filter(username=username, password=password)
-		print(user)
+		# print(user)
 		if user.count() == 1:
 			# 查询好友，群组，历史记录
 			# login(request, user)
 			# todo
-			print('已登录')
-			print(user[0].status)
+			# print('已登录')
+			# print(user[0].status)
 			user[0].status = 'ON'
-			print(user[0].status)
+			# print(user[0].status)
 			user[0].save()
 			return JsonResponse({'code': 0, 'status': True, 'info': '登录成功', 'user_id': user[0].id})
 			# return render(request, 'chat.html', context={'user_id': user[0].id})
 			# return HttpResponseRedirect(reverse('chat_home'))
 		else:
-			print('用户不存在')
+			# print('用户不存在')
 			return render(request, 'login/login.html', {'username': username, 'password': password})
-	print('do_login get')
+	# print('do_login get')
 	return render(request, 'login/login.html')
 
 
@@ -46,10 +46,6 @@ def signin(request):
 	:param request:
 	:return:
 	'''
-	print('用户注册')
-	print(request)
-	print(request.method)
-	print(request.POST)
 	if request.method == 'POST':
 		# form = SignInForm(request.POST)
 		# if form.is_valid():  # 如果提交的数据合法
@@ -61,16 +57,7 @@ def signin(request):
 		city = request.POST.get('city', None)
 		birthday = request.POST.get('birthday', None)
 		phone = request.POST.get('phone')
-		print('username', username)
-		print('password', password)
-		print('sex', sex)
-		print('signature', signature)
-		print('email', email)
-		print('city', city)
-		print('birthday', birthday)
-		print('phone', phone)
 		users = User.objects.filter(username=username)
-		# print(user)
 		if users.count() != 0:
 			return JsonResponse({'code': -1, 'status': False, 'info': '注册失败, 用户名已经存在'})
 		user = User.objects.create(username=username, password=password, email=email, phone=phone,
