@@ -34,6 +34,7 @@ def msg_gateway(request):
 		from_user_avatar = request.POST.get('mine[avatar]', None)
 		from_user_id = request.POST.get('mine[id]', None)
 		content = request.POST.get('mine[content]', None)
+		print(content)
 		
 		# 消息接收方
 		to_user = request.POST.get('to[name]', None)
