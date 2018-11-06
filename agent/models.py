@@ -12,7 +12,7 @@ class Agent(models.Model):
 
 class Client(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	name = models.CharField(max_length=100, verbose_name="客户昵称")
+	name = models.CharField(max_length=100, verbose_name="客户昵称", default='访客')
 	# 客户头像
 	avatar = models.CharField(max_length=128, default='/statics/img/default_avatar_male_180.gif', verbose_name="客户头像")
 	# 客户的IP地址

@@ -19,49 +19,55 @@
 		var layim = layui.layim
 		,layer = layui.layer
 		,$ = layui.jquery;
-		let user_id = localStorage.getItem('layim-user-id');
-		if (user_id === null) {
-			user_id = generateUUID();
-			localStorage.setItem('layim-user-id', user_id);
+		let client_id = localStorage.getItem('layim-client-id');
+		let username = localStorage.getItem('layim-username');
+		let avatar = localStorage.getItem('layui-avatar');
+		console.log(client_id);
+		if (client_id === null) {
+			client_id = generateUUID();
+			localStorage.setItem('layim-client-id', client_id);
 
 			$.ajax({
-				url: '',
+				url: '/agent/create_user/',
 				type: 'post',
 				data: {
-					user_id: user_id,
+					client_id: client_id,
 				},
 				success: function (res) {
+					console.log(typeof res);
 					if (res.code !== 0)
 						return;
-					// 配置客服界面
-					layim.config({
-						init: {
-							//配置客户信息
-							mine: {
-								"username": "访客" //我的昵称
-								,"id": "100000123" //我的ID
-								,"status": "online" //在线状态 online：在线、hide：隐身
-								,"remark": "在深邃的编码世界，做一枚轻盈的纸飞机" //我的签名
-								,"avatar": "//res.layui.com/images/fly/avatar/00.jpg" //我的头像
-							}
-						}
-						//开启客服模式
-						,brief: true
-					});
-
-					//打开一个客服面板
-					layim.chat({
-						name: '在线客服' //名称
-						,type: 'kefu' //聊天类型
-						,avatar: "{% static 'img/7fde8b93jw1e8qgp5bmzyj2050050aa8.jpg' %}" //头像
-						,id: 1111111 //定义唯一的id方便你处理信息
-					});
-
-					layim.setChatMin(); //收缩聊天面板
+					username = res.data.username;
+					avatar = res.data.avatar;
 				}
 			})
-
 		}
+
+		// 配置客服界面
+		layim.config({
+			init: {
+				//配置客户信息
+				mine: {
+					"username": username //我的昵称
+					,"id": client_id //我的ID
+					,"status": "online" //在线状态 online：在线、hide：隐身
+					,"remark": "在深邃的编码世界，做一枚轻盈的纸飞机" //我的签名
+					,"avatar": avatar //我的头像
+				}
+			}
+			//开启客服模式
+			,brief: true
+		});
+
+		//打开一个客服面板
+		layim.chat({
+			name: '在线客服' //名称
+			,type: 'kefu' //聊天类型
+			,avatar: "{% static 'img/7fde8b93jw1e8qgp5bmzyj2050050aa8.jpg' %}" //头像
+			,id: 1111111 //定义唯一的id方便你处理信息
+		});
+
+		layim.setChatMin(); //收缩聊天面板
 	});
 </script>
 </html>
