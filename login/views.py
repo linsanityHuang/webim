@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from chat.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
+import html
 import sys
 import codecs
 sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
@@ -17,7 +18,9 @@ def do_login(request):
 	if request.method == 'POST':
 		# print('do_login post')
 		username = request.POST.get('username', None)
+		username = html.escape(username)
 		password = request.POST.get('password', None)
+		password = html.escape(password)
 		# print('username', username)
 		# print('password', password)
 		# user = authenticate(request, username=username, password=password)
@@ -53,10 +56,14 @@ def signin(request):
 		# form = SignInForm(request.POST)
 		# if form.is_valid():  # 如果提交的数据合法
 		username = request.POST.get('username', None)
+		username = html.escape(username)
 		password = request.POST.get('password', None)
+		password = html.escape(password)
 		sex = request.POST.get('sex', None)
 		signature = request.POST.get('signature', None)
+		signature = html.escape(signature)
 		email = request.POST.get('email', None)
+		email = html.escape(email)
 		city = request.POST.get('city', None)
 		birthday = request.POST.get('birthday', None)
 		phone = request.POST.get('phone')

@@ -1,14 +1,13 @@
 # chat/views.py
 import time
 import uuid
-import html
 import datetime
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
-from django.conf import settings
+from WebIM.settings import Domain, ALLOWED_EXTENSIONS
 import sys
 import codecs
 sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
@@ -405,6 +404,10 @@ def search_friend(request):
 		return JsonResponse(res)
 
 
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @csrf_exempt
 def upload_image(request):
 	'''
@@ -420,15 +423,16 @@ def upload_image(request):
 	}
 	if request.method == 'POST':
 		pic = request.FILES.get('file')
-		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
-		image = ImageModel.objects.create(model_pic=pic)
-		# qiniu_upload(pic)
-		# print(image.model_pic.name)
-		res['code'] = 0
-		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % (settings.Domain, date, pic.name)
-		# print(res)
-		return JsonResponse(res)
+		if pic and allowed_file(pic.name):
+			pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
+			ImageModel.objects.create(model_pic=pic)
+			res['code'] = 0
+			date = datetime.datetime.now().strftime("%y%m%d")
+			res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
+			return JsonResponse(res)
+		else:
+			res['msg'] = '文件类型不被允许'
+			return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 
@@ -449,16 +453,20 @@ def upload_avatar(request):
 	if request.method == 'POST':
 		user_id = request.GET.get('user_id', None)
 		pic = request.FILES.get('file')
-		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
-		image = ImageModel.objects.create(model_pic=pic)
-		res['code'] = 0
-		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % (settings.Domain, date, pic.name)
-		user = User.objects.get(pk=user_id)
-		user.avatar = res['data']['src']
-		user.save()
-		# print(res)
-		return JsonResponse(res)
+		if pic and allowed_file(pic.name):
+			pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
+			ImageModel.objects.create(model_pic=pic)
+			res['code'] = 0
+			date = datetime.datetime.now().strftime("%y%m%d")
+			res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
+			user = User.objects.get(pk=user_id)
+			user.avatar = res['data']['src']
+			user.save()
+			# print(res)
+			return JsonResponse(res)
+		else:
+			res['msg'] = '文件类型不被允许'
+			return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 
@@ -478,15 +486,17 @@ def upload_file(request):
 	}
 	if request.method == 'POST':
 		file_ = request.FILES.get('file')
-		file_.name = str(uuid.uuid4()) + '.' + file_.name.rsplit('.', 1)[1]
-		file_model = FileModel.objects.create(model_file=file_)
-		# qiniu_upload(pic)
-		# print(file_model.model_file.name)
-		res['code'] = 0
-		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % (settings.Domain, date, file_.name)
-		# print(res)
-		return JsonResponse(res)
+		if file_ and allowed_file(file_.name):
+			file_.name = str(uuid.uuid4()) + '.' + file_.name.rsplit('.', 1)[1]
+			FileModel.objects.create(model_file=file_)
+			res['code'] = 0
+			date = datetime.datetime.now().strftime("%y%m%d")
+			res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, file_.name)
+			# print(res)
+			return JsonResponse(res)
+		else:
+			res['msg'] = '文件类型不被允许'
+			return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 

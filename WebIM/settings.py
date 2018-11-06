@@ -107,11 +107,8 @@ def mysql_settings():
 DATABASES = {
 	'default': mysql_settings()
 }
-
-if DEBUG:
-	Domain = 'http://127.0.0.1:8000'
-else:
-	Domain = 'https://iwantme.cn'
+# Domain = 'http://127.0.0.1:8000'
+Domain = 'https://iwantme.cn'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -165,3 +162,7 @@ EMAIL_PORT = 465
 EMAIL_HOST_USER = 'js_huang2018@163.com'
 EMAIL_HOST_PASSWORD = 'a13342404594@'  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+# 上传文件白名单
+ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif')
