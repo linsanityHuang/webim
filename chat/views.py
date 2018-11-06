@@ -10,7 +10,7 @@ from chat.consumers import channel_publish
 from WebIM.settings import Domain, ALLOWED_EXTENSIONS
 import sys
 import codecs
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
 def home(request):

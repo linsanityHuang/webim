@@ -4,7 +4,7 @@ from .models import Client
 from django.views.decorators.csrf import csrf_exempt
 import sys
 import codecs
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
 def agent(request):
