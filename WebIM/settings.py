@@ -153,16 +153,6 @@ STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "statics"),
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_SSL = True
-# 如果是 163 改成 smtp.163.com
-EMAIL_HOST = 'smtp.163.com'
-EMAIL_PORT = 465
-# 帐号
-EMAIL_HOST_USER = 'js_huang2018@163.com'
-EMAIL_HOST_PASSWORD = 'a13342404594@'  # 密码
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 
 # 上传文件白名单
 ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif')
