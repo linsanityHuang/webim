@@ -25,6 +25,8 @@ SECRET_KEY = '3zt8c)88lmp_8kif4&y*#oy=myhsdh5do)xjixb3$$b+i-2+vt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+# Domain = 'http://127.0.0.1:8000'
+Domain = 'https://iwantme.cn'
 
 ALLOWED_HOSTS = ['*']
 
@@ -135,8 +137,6 @@ def mysql_settings():
 DATABASES = {
 	'default': mysql_settings()
 }
-# Domain = 'http://127.0.0.1:8000'
-Domain = 'https://iwantme.cn'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
