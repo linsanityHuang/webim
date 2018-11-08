@@ -8,17 +8,16 @@ from django.http import JsonResponse
 from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
 from WebIM.settings import Domain, ALLOWED_EXTENSIONS
-import sys
-import codecs
-# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
-def home(request):
-	user_id = request.GET.get('user_id', None)
-	if user_id is not None:
-		user = User.objects.get(id=user_id)
-		return render(request, 'chat/chat.html', {'id': user_id})
-	return render(request, 'chat/chat.html', {'user_id': user_id})
+def chat_pc(request):
+	print('pc')
+	return render(request, 'chat/chat_pc.html')
+
+
+def chat_mobile(request):
+	print('mobile')
+	return render(request, 'chat/chat_mobile.html')
 
 
 @csrf_exempt

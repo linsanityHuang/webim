@@ -1,11 +1,8 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from chat.models import User, Group
-from django.views.decorators.csrf import csrf_exempt
 import html
-import sys
-import codecs
-# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+from django.http import JsonResponse
+from django.shortcuts import render, HttpResponseRedirect, reverse
+from django.views.decorators.csrf import csrf_exempt
+from chat.models import User, Group
 
 
 @csrf_exempt
@@ -36,8 +33,8 @@ def do_login(request):
 			# print(user[0].status)
 			user[0].save()
 			return JsonResponse({'code': 0, 'status': True, 'info': '登录成功', 'user_id': user[0].id})
-			# return render(request, 'chat.html', context={'user_id': user[0].id})
-			# return HttpResponseRedirect(reverse('chat_home'))
+			# return render(request, 'chat/chat_pc.html', context={'user_id': user[0].id})
+			# return HttpResponseRedirect(reverse('chat_pc'))
 		else:
 			# print('用户不存在')
 			return render(request, 'login/login.html', {'username': username, 'password': password})

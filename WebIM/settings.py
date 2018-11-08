@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from urllib.parse import urlparse
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3zt8c)88lmp_8kif4&y*#oy=myhsdh5do)xjixb3$$b+i-2+vt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -83,6 +85,32 @@ CHANNEL_LAYERS = {
 		},
 	},
 }
+
+# cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            # 'PASSWORD': redis_url.password,
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PICKLE_VERSION': -1,  # Use the latest protocol version 默认使用最新的 pickle.
+			'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds socket 建立连接超时设置
+            'SOCKET_TIMEOUT': 60,  # in seconds 连接建立后的读写操作超时设置
+			"CONNECTION_POOL_KWARGS": {"max_connections": 100},		# 配置默认连接池
+            'IGNORE_EXCEPTIONS': True,
+        }
+    }
+}
+
+REDIS_TIMEOUT = 7*24*60*60
+CUBES_REDIS_TIMEOUT = 60*60
+NEVER_REDIS_TIMEOUT = 365*24*60*60
+
+# Django 默认可以使用任何 cache backend 作为 session backend,
+# 将 django-redis 作为 session 储存后端不用安装任何额外的 backend
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -156,3 +184,16 @@ STATICFILES_DIRS = [
 
 # 上传文件白名单
 ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif')
+
+
+# 本地开发配置放在local_settings.py中
+# try:
+# 	from .local_settings import *
+# except ImportError:
+# 	pass
+
+
+###
+# 部署上线需要修改的地方
+# Domain = 'https://iwantme.cn'
+# DEBUG = False
