@@ -40,7 +40,7 @@
 </form>
 
 <script>
-// let is_mobile = detectmob();
+let is_mobile = detectmob();
 
 layui.use(['form', 'jquery'], function(){
     var form = layui.form
@@ -53,7 +53,8 @@ layui.use(['form', 'jquery'], function(){
             data: data.field,
             success: function(data){
                 console.log(data);
-                let is_mobile = true;
+                // let is_mobile = true;
+	            is_mobile = true;
 	            if (data.code === 0 && is_mobile){
 	            	console.log('移动端');
 		            location.href = '/chat/chat_mobile/?user_id='+data.user_id
