@@ -185,7 +185,7 @@ layui.use(['layim', 'jquery', 'element', 'layer'], function(layim){
 		u = layim.cache();
 		$('#user').find('img').attr('src', u.mine.avatar);
 		$('#username').text(u.mine.username);
-		$('#logout').attr('href', '/login/logout/?user_id='+u.mine.id);
+		$('#logout').attr('href', '/login/do_logout/?user_id='+u.mine.id);
 		$('#user_info').attr('href', '/chat/user_info/?user_id='+u.mine.id);
 
 		// 监听收到的聊天消息

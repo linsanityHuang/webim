@@ -24,9 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3zt8c)88lmp_8kif4&y*#oy=myhsdh5do)xjixb3$$b+i-2+vt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# Domain = 'http://127.0.0.1:8000'
-Domain = 'https://iwantme.cn'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -183,8 +181,30 @@ STATICFILES_DIRS = [
 
 
 # 上传文件白名单
-ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif')
+ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip')
+# 2.5MB - 2621440
+# 5MB - 5242880
+# 10MB - 10485760
+# 20MB - 20971520
+# 50MB - 5242880
+# 100MB 104857600
+# 250MB - 214958080
+# 500MB - 429916160
+MAX_UPLOAD_SIZE = 10485760
 
+# LOGIN_URL
+LOGIN_URL = '/'
+Domain = 'http://127.0.0.1:8000'
+# Domain = 'https://iwantme.cn'
+
+AUTH_USER_MODEL = 'chat.IMUser'
+
+# session 设置
+# 30分钟
+SESSION_COOKIE_AGE = 60 * 5
+SESSION_SAVE_EVERY_REQUEST = True
+# 关闭浏览器，则COOKIE失效
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # 本地开发配置放在local_settings.py中
 # try:
