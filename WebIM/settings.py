@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3zt8c)88lmp_8kif4&y*#oy=myhsdh5do)xjixb3$$b+i-2+vt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -194,8 +194,8 @@ MAX_UPLOAD_SIZE = 10485760
 
 # LOGIN_URL
 LOGIN_URL = '/'
-Domain = 'http://127.0.0.1:8000'
-# Domain = 'https://iwantme.cn'
+# Domain = 'http://127.0.0.1:8000'
+Domain = 'https://iwantme.cn'
 
 AUTH_USER_MODEL = 'chat.IMUser'
 
