@@ -59,6 +59,20 @@
 			,brief: true
 		});
 
+		layim.on('sendMessage', function(res){
+		    console.log(res);
+		    // $.ajax({
+			// 	url: '/chat/msg_gateway/',
+			// 	type: 'post',
+			// 	data: res,
+			// 	success: function(data){
+			// 		if (data.code !== 0) {
+			// 			layer.msg('消息发送失败', {icon: 2})
+			// 		}
+			// 	}
+			// })
+		});
+
 		//打开一个客服面板
 		layim.chat({
 			name: '在线客服' //名称

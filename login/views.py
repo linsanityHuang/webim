@@ -19,10 +19,10 @@ def do_login(request):
 		username = html.escape(username)
 		password = request.POST.get('password', None)
 		password = html.escape(password)
-		print('username', username)
-		print('password', password)
+		# print('username', username)
+		# print('password', password)
 		user = authenticate(request, username=username, password=password)
-		print(user)
+		# print(user)
 		# user = IMUser.objects.filter(username=username, password=password)
 		if user is not None:
 			login(request, user)
@@ -96,6 +96,6 @@ def do_logout(request):
 	# user = IMUser.objects.get(pk=user_id)
 	# user.status = 'OFF'
 	# user.save()
-	print(request)
+	# print(request)
 	logout(request)
 	return render(request, 'login/login.html')

@@ -14,13 +14,13 @@ from django.views.decorators.http import require_http_methods
 
 @login_required(login_url='index')
 def chat_pc(request):
-	print('pc')
+	# print('pc')
 	return render(request, 'chat/chat_pc.html')
 
 
 @login_required(login_url='index')
 def chat_mobile(request):
-	print('mobile')
+	# print('mobile')
 	return render(request, 'chat/chat_mobile.html')
 
 
@@ -438,7 +438,7 @@ def upload_image(request):
 		return JsonResponse(res)
 	# print(dir(pic))
 	# print(type(pic.size))
-	print(pic.size)
+	# print(pic.size)
 	if pic.size > MAX_UPLOAD_SIZE:
 		res['msg'] = '图片大小超过限制'
 	elif not allowed_file(pic.name):
@@ -508,7 +508,7 @@ def upload_file(request):
 		return JsonResponse(res)
 	# print(dir(pic))
 	# print(type(pic.size))
-	print(file_.size)
+	# print(file_.size)
 	if file_.size > MAX_UPLOAD_SIZE:
 		res['msg'] = '文件大小超过限制'
 	elif not allowed_file(file_.name):
