@@ -2,7 +2,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from .models import Group
+from .models import IMGroup
 import json
 
 

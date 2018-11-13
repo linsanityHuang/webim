@@ -8,7 +8,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   {% block css %}
-        <link rel="stylesheet" href="{% static 'dist/css/layui.css' %}" media="all">
+        <link rel="stylesheet" href="{% static 'src/css/layui.css' %}" media="all">
   {% endblock %}
 </head>
 <body>
@@ -92,7 +92,7 @@
 	</div>
 </form>
 {% block script %}
-    <script src="{% static 'dist/layui.js' %}" charset="utf-8"></script>
+    <script src="{% static 'src/layui.js' %}" charset="utf-8"></script>
 {% endblock %}
 <script>
 layui.use(['form', 'laydate', 'jquery'], function(){

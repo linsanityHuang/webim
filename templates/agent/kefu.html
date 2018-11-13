@@ -1,0 +1,87 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>客服</title>
+	{% block css %}
+        <link rel="stylesheet" href="{% static 'src/css/layui.css' %}" media="all">
+    {% endblock %}
+</head>
+{% block script %}
+    <script src="{% static 'src/layui.js' %}"></script>
+	<script src="{% static 'js/utils.js' %}"></script>
+{% endblock %}
+<body>
+</body>
+<script>
+	layui.use('layim', function(layim){
+		var layim = layui.layim
+		,layer = layui.layer
+		,$ = layui.jquery;
+		let client_id = localStorage.getItem('layim-client-id');
+		let username = localStorage.getItem('layim-username');
+		let avatar = localStorage.getItem('layui-avatar');
+		console.log(client_id);
+		if (client_id === null) {
+			client_id = generateUUID();
+			localStorage.setItem('layim-client-id', client_id);
+
+			$.ajax({
+				url: '/agent/create_user/',
+				type: 'post',
+				data: {
+					client_id: client_id,
+				},
+				success: function (res) {
+					console.log(typeof res);
+					if (res.code !== 0)
+						return;
+					username = res.data.username;
+					avatar = res.data.avatar;
+				}
+			})
+		}
+
+		// 配置客服界面
+		layim.config({
+			init: {
+				//配置客户信息
+				mine: {
+					"username": username //我的昵称
+					,"id": client_id //我的ID
+					,"status": "online" //在线状态 online：在线、hide：隐身
+					,"remark": "在深邃的编码世界，做一枚轻盈的纸飞机" //我的签名
+					,"avatar": avatar //我的头像
+				}
+			}
+			//开启客服模式
+			,brief: true
+		});
+
+		layim.on('sendMessage', function(res){
+		    console.log(res);
+		    // $.ajax({
+			// 	url: '/chat/msg_gateway/',
+			// 	type: 'post',
+			// 	data: res,
+			// 	success: function(data){
+			// 		if (data.code !== 0) {
+			// 			layer.msg('消息发送失败', {icon: 2})
+			// 		}
+			// 	}
+			// })
+		});
+
+		//打开一个客服面板
+		layim.chat({
+			name: '在线客服' //名称
+			,type: 'kefu' //聊天类型
+			,avatar: "{% static 'img/7fde8b93jw1e8qgp5bmzyj2050050aa8.jpg' %}" //头像
+			,id: 1111111 //定义唯一的id方便你处理信息
+		});
+
+		layim.setChatMin(); //收缩聊天面板
+	});
+</script>
+</html>

@@ -5,7 +5,8 @@ from django.conf.urls import url
 
 urlpatterns = [
 	url(r'^msg_gateway/$', views.msg_gateway),
-	url(r'^chat_home/$', views.home, name='chat_home'),
+	url(r'^chat_pc/$', views.chat_pc, name='chat_pc'),
+	url(r'^chat_mobile/$', views.chat_mobile, name='chat_mobile'),
 	url(r'^init/$', views.init_user, name='init'),
 	url(r'^init_group_chat/$', views.init_group_chat, name='init_group_chat'),
 	url(r'^upload_image/$', views.upload_image, name='upload_image'),

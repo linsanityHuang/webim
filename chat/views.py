@@ -2,25 +2,29 @@
 import time
 import uuid
 import datetime
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from chat.models import User, Group, GroupChat, ImageModel, FileModel, Message
+from chat.models import IMUser, IMGroup, IMGroupChat, ImageModel, FileModel, Message
 from chat.consumers import channel_publish
-from WebIM.settings import Domain
-import sys
-import codecs
-# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+from WebIM.settings import Domain, ALLOWED_EXTENSIONS, MAX_UPLOAD_SIZE
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 
 
-def home(request):
-	user_id = request.GET.get('user_id', None)
-	if user_id is not None:
-		user = User.objects.get(id=user_id)
-		return render(request, 'chat/chat.html', {'id': user_id})
-	return render(request, 'chat/chat.html', {'user_id': user_id})
+@login_required(login_url='index')
+def chat_pc(request):
+	# print('pc')
+	return render(request, 'chat/chat_pc.html')
 
 
+@login_required(login_url='index')
+def chat_mobile(request):
+	# print('mobile')
+	return render(request, 'chat/chat_mobile.html')
+
+
+# @login_required
 @csrf_exempt
 def msg_gateway(request):
 	'''
@@ -85,6 +89,7 @@ def msg_gateway(request):
 		return JsonResponse({'code': 0, 'status': True, 'info': '消息发送成功'})
 	
 
+# @login_required
 @csrf_exempt
 def history_msg(request):
 	'''
@@ -133,6 +138,7 @@ def history_msg(request):
 		return JsonResponse(res)
 	
 
+# @login_required
 def init_user(request):
 	'''
 	初始化用户聊天界面
@@ -161,7 +167,7 @@ def init_user(request):
 		return JsonResponse(res)
 	
 	# 查询用户的好友分组
-	groups = Group.objects.filter(owner=user_id)
+	groups = IMGroup.objects.filter(owner=user_id)
 	friends = list()
 	for item in groups:
 		# print('group', item.name)
@@ -186,8 +192,8 @@ def init_user(request):
 	res['data']['friend'] = friends
 	
 	# 群组列表
-	user = User.objects.get(pk=user_id)
-	group_chats = user.group_chat_members.all()
+	user = IMUser.objects.get(pk=user_id)
+	group_chats = user.im_group_chat_members.all()
 	res['data']['group'] = [{'groupname': item.name, 'id': item.id, 'avatar': item.group_chat_avatar} for item in group_chats]
 	
 	# 我的信息
@@ -222,7 +228,7 @@ def init_group_chat(request):
 	if group_chat_id is None:
 		res['msg'] = 'group_chat_id is None'
 		return JsonResponse(res)
-	group_chat = GroupChat.objects.get(id=group_chat_id)
+	group_chat = IMGroupChat.objects.get(id=group_chat_id)
 	res['data']['list'] = [
 					{
 						'username': item.username,
@@ -236,6 +242,7 @@ def init_group_chat(request):
 	return JsonResponse(res)
 
 
+# @login_required
 @csrf_exempt
 def add_friend(request):
 	'''
@@ -255,8 +262,8 @@ def add_friend(request):
 		# 好友申请信息
 		remark = request.POST.get('remark', None)
 		# print('用户A的ID', a_user_id)
-		user = User.objects.get(pk=a_user_id)
-		friend = User.objects.get(pk=b_friend_id)
+		user = IMUser.objects.get(pk=a_user_id)
+		friend = IMUser.objects.get(pk=b_friend_id)
 		# print('%s要添加%s为好友' % (user.username, friend.username))
 		# 向用户B发送好友申请
 		content = {
@@ -278,7 +285,7 @@ def add_friend(request):
 	elif 'pass' == res_type:
 		# 申请添加好友的用户ID
 		user_id = request.POST.get('user_id', None)
-		user = User.objects.get(id=user_id)
+		user = IMUser.objects.get(id=user_id)
 		# 被添加的用户ID
 		friend_id = request.POST.get('friend_id', None)
 		# 用户A的好友组
@@ -286,11 +293,11 @@ def add_friend(request):
 		# 用户B的好友组
 		b_group_id = request.POST.get('b_group_id', None)
 		
-		friend = User.objects.get(id=friend_id)
+		friend = IMUser.objects.get(id=friend_id)
 		# 获取好友组
-		a_group = Group.objects.get(id=a_group_id)
+		a_group = IMGroup.objects.get(id=a_group_id)
 		a_group.group_members.add(friend)
-		b_group = Group.objects.get(pk=b_group_id)
+		b_group = IMGroup.objects.get(pk=b_group_id)
 		b_group.group_members.add(user)
 		# print('%s同意了%s的好友申请' % (friend.username, user.username))
 		# 向用户A通知申请通过
@@ -322,6 +329,7 @@ def add_friend(request):
 		return JsonResponse(b_content['msg'])
 	
 
+# @login_required
 @csrf_exempt
 def apply_group_chat(request):
 	'''
@@ -334,10 +342,10 @@ def apply_group_chat(request):
 		user_id = request.POST.get('user_id', None)
 		group_chat_id = request.POST.get('group_chat_id', None)
 		remark = request.POST.get('remark', None)
-		user = User.objects.get(pk=user_id)
+		user = IMUser.objects.get(pk=user_id)
 		# 给群聊管理员发送申请通知
-		group_chat = GroupChat.objects.get(pk=group_chat_id)
-		admins = group_chat.group_admins.all()
+		group_chat = IMGroupChat.objects.get(pk=group_chat_id)
+		admins = group_chat.im_group_admins.all()
 		content = {
 			'channel_type': 'apply_group_chat',
 			'msg': {
@@ -355,6 +363,7 @@ def apply_group_chat(request):
 		return JsonResponse({'code': 0, 'status': True, 'info': '申请已发送'})
 		
 
+# @login_required
 @csrf_exempt
 def search_friend(request):
 	'''
@@ -386,7 +395,7 @@ def search_friend(request):
 					'sign': user.signature,
 					'avatar': user.avatar
 				}
-				for user in User.objects.filter(username__icontains=key_word) if str(user.id) != user_id
+				for user in IMUser.objects.filter(username__icontains=key_word) if str(user.id) != user_id
 			]
 			res['count'] = len(result)
 			res['data'] = result
@@ -397,13 +406,19 @@ def search_friend(request):
 					'group_chat_name': group_chat.name,
 					'avatar': group_chat.group_chat_avatar
 				}
-				for group_chat in GroupChat.objects.filter(name__icontains=key_word)
+				for group_chat in IMGroupChat.objects.filter(name__icontains=key_word)
 			]
 			res['count'] = len(result)
 			res['data'] = result
 		return JsonResponse(res)
 
 
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# @login_required
+@require_http_methods(["POST"])
 @csrf_exempt
 def upload_image(request):
 	'''
@@ -417,21 +432,27 @@ def upload_image(request):
 		'data': {
 		}
 	}
-	if request.method == 'POST':
-		pic = request.FILES.get('file')
+	pic = request.FILES.get('file', None)
+	if pic is None:
+		res['msg'] = '上传的图片异常，请重试'
+		return JsonResponse(res)
+	# print(dir(pic))
+	# print(type(pic.size))
+	# print(pic.size)
+	if pic.size > MAX_UPLOAD_SIZE:
+		res['msg'] = '图片大小超过限制'
+	elif not allowed_file(pic.name):
+		res['msg'] = '图片类型不被允许'
+	else:
 		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
-		image = ImageModel.objects.create(model_pic=pic)
-		# qiniu_upload(pic)
-		# print(image.model_pic.name)
+		ImageModel.objects.create(model_pic=pic)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
-		# print(res)
-		return JsonResponse(res)
-	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 
 
+# @login_required
 @csrf_exempt
 def upload_avatar(request):
 	'''
@@ -448,20 +469,26 @@ def upload_avatar(request):
 	if request.method == 'POST':
 		user_id = request.GET.get('user_id', None)
 		pic = request.FILES.get('file')
-		pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
-		image = ImageModel.objects.create(model_pic=pic)
-		res['code'] = 0
-		date = datetime.datetime.now().strftime("%y%m%d")
-		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
-		user = User.objects.get(pk=user_id)
-		user.avatar = res['data']['src']
-		user.save()
-		# print(res)
-		return JsonResponse(res)
+		if pic and allowed_file(pic.name):
+			pic.name = str(uuid.uuid4()) + '.' + pic.name.rsplit('.', 1)[1]
+			ImageModel.objects.create(model_pic=pic)
+			res['code'] = 0
+			date = datetime.datetime.now().strftime("%y%m%d")
+			res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, pic.name)
+			user = IMUser.objects.get(pk=user_id)
+			user.avatar = res['data']['src']
+			user.save()
+			# print(res)
+			return JsonResponse(res)
+		else:
+			res['msg'] = '文件类型不被允许'
+			return JsonResponse(res)
 	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 
 
+# @login_required
+@require_http_methods(["POST"])
 @csrf_exempt
 def upload_file(request):
 	'''
@@ -475,21 +502,27 @@ def upload_file(request):
 		'data': {
 		}
 	}
-	if request.method == 'POST':
-		file_ = request.FILES.get('file')
+	file_ = request.FILES.get('file', None)
+	if file_ is None:
+		res['msg'] = '上传的文件异常，请重试'
+		return JsonResponse(res)
+	# print(dir(pic))
+	# print(type(pic.size))
+	# print(file_.size)
+	if file_.size > MAX_UPLOAD_SIZE:
+		res['msg'] = '文件大小超过限制'
+	elif not allowed_file(file_.name):
+		res['msg'] = '文件类型不被允许'
+	else:
 		file_.name = str(uuid.uuid4()) + '.' + file_.name.rsplit('.', 1)[1]
-		file_model = FileModel.objects.create(model_file=file_)
-		# qiniu_upload(pic)
-		# print(file_model.model_file.name)
+		FileModel.objects.create(model_file=file_)
 		res['code'] = 0
 		date = datetime.datetime.now().strftime("%y%m%d")
 		res['data']['src'] = '%s/statics/upload/%s/%s' % (Domain, date, file_.name)
-		# print(res)
-		return JsonResponse(res)
-	res['msg'] = '上传文件失败'
 	return JsonResponse(res)
 
 
+# @login_required
 @csrf_exempt
 def modify_sign(request):
 	'''
@@ -503,13 +536,14 @@ def modify_sign(request):
 		# print('sign', sign)
 		# print('user_id', user_id)
 		if sign and user_id:
-			user = User.objects.get(pk=user_id)
+			user = IMUser.objects.get(pk=user_id)
 			user.signature = sign
 			user.save()
 			return JsonResponse({'code': 0, 'msg': 'success'})
 		return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
 	
 
+# @login_required
 @csrf_exempt
 def modify_status(request):
 	'''
@@ -523,25 +557,27 @@ def modify_status(request):
 		# print('sign', status)
 		# print('user_id', user_id)
 		if status and user_id:
-			user = User.objects.get(pk=user_id)
+			user = IMUser.objects.get(pk=user_id)
 			user.status = 'ON' if status == 'online' else 'OFF'
 			user.save()
 			return JsonResponse({'code': 0, 'msg': 'success'})
 		return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
 	
 
+# @login_required
 @csrf_exempt
 def group_chat_ids(request):
 	if request.method == 'POST':
 		user_id = request.POST.get('user_id', None)
 		if not user_id:
 			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
-		user = User.objects.get(pk=user_id)
+		user = IMUser.objects.get(pk=user_id)
 		group_chats = user.groupchat_set.all()
 		data = [item.id for item in group_chats]
 		return JsonResponse({'code': 0, 'msg': '', 'data': data})
 	
 
+# @login_required
 @csrf_exempt
 def add_group_chat(request):
 	'''
@@ -556,13 +592,14 @@ def add_group_chat(request):
 		group_chat_avatar = request.POST.get('group_chat_avatar', None)
 		if not group_chat_name or not user_id:
 			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
-		user = User.objects.get(pk=user_id)
-		group_chat = GroupChat.objects.create(name=group_chat_name)
+		user = IMUser.objects.get(pk=user_id)
+		group_chat = IMGroupChat.objects.create(name=group_chat_name)
 		group_chat.group_admins.add(user)
 		group_chat.group_chat_members.add(user)
 		return JsonResponse({'code': 0, 'msg': '', 'data': {'group_id': group_chat.id, 'group_avatar': group_chat.group_chat_avatar}})
 
 
+# @login_required
 @csrf_exempt
 def add_group(request):
 	'''
@@ -576,17 +613,18 @@ def add_group(request):
 		group_avatar = request.POST.get('group_avatar', None)
 		if not group_name or not user_id:
 			return JsonResponse({'code': -1, 'msg': 'invalid parameters'})
-		user = User.objects.get(pk=user_id)
-		group = Group.objects.create(name=group_name, owner=user)
+		user = IMUser.objects.get(pk=user_id)
+		group = IMGroup.objects.create(name=group_name, owner=user)
 		return JsonResponse({'code': 0, 'msg': '', 'data': {'group_id': group.id}})
 	
 
+@login_required(login_url='index')
 @csrf_exempt
 def user_info(request):
 	if request.method == 'GET':
 		user_id = request.GET.get('user_id', None)
 		if user_id:
-			user = User.objects.get(pk=user_id)
+			user = get_object_or_404(IMUser, pk=user_id)
 			return render(request, 'chat/user_info.html', context={'user': user})
 		return render(request, 'chat/user_info.html')
 	else:
@@ -598,7 +636,7 @@ def user_info(request):
 		user_id = request.POST.get('user_id', None)
 		if not user_id:
 			return JsonResponse({'code': -1, 'status': False, 'info': 'invalid user_id'})
-		user = User.objects.get(pk=user_id)
+		user = IMUser.objects.get(pk=user_id)
 		user.signature = signature
 		user.email = email
 		user.birthday = birthday

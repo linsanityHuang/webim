@@ -19,6 +19,7 @@ from login import views as login_views
 
 urlpatterns = [
 	url(r'^$', login_views.do_login, name='index'),
+	url(r'^agent/', include('agent.urls')),
 	url(r'^login/', include('login.urls')),
 	url(r'^chat/', include('chat.urls')),
 	url(r'^admin/', admin.site.urls),
