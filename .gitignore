@@ -9,6 +9,9 @@ __pycache__/
 chat/migrations/
 login/migrations/
 statics/upload/
+statics/dist/
+statics/src/
+statics/img/
 
 # Distribution / packaging
 .Python
