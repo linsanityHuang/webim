@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 from urllib.parse import urlparse
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3zt8c)88lmp_8kif4&y*#oy=myhsdh5do)xjixb3$$b+i-2+vt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -122,6 +121,7 @@ SESSION_CACHE_ALIAS = 'default'
 # 	}
 # }
 
+
 def mysql_settings():
 	MYSQL_HOST = '127.0.0.1'
 	MYSQL_PORT = '3306'
@@ -194,8 +194,8 @@ MAX_UPLOAD_SIZE = 10485760
 
 # LOGIN_URL
 LOGIN_URL = '/'
-# Domain = 'http://127.0.0.1:8000'
-Domain = 'https://iwantme.cn'
+Domain = 'http://127.0.0.1:8000'
+# Domain = 'https://iwantme.cn'
 
 AUTH_USER_MODEL = 'chat.IMUser'
 
