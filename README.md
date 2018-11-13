@@ -2,7 +2,7 @@
 
 ##介绍
 这是一个web端即时通讯，目前尚处于开发过程中，主体功能已经完成，但是一些细节功能尚需优化和补充。
-目前该项目已经部署在阿里云，访问https://iwantme.cn即可体验。部署方案采用Nginx+supervisor+daphne+gunicorn
+目前该项目已经部署在阿里云，部署方案采用Nginx+supervisor+daphne+gunicorn, 如需体验请访问https://iwantme.cn
 
 
 ##功能介绍
