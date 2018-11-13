@@ -1,5 +1,5 @@
 from django.contrib import admin
-from chat.models import User, GroupChat, Group, Message
+from chat.models import IMUser, IMGroupChat, IMGroup, Message
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -18,9 +18,6 @@ class UserAdmin(admin.ModelAdmin):
 	)
 
 
-admin.site.register(User, UserAdmin)
-admin.site.register(Group)
-admin.site.register(GroupChat)
-# admin.site.register(Membership)
-# admin.site.register(Message)
-# admin.site.register(GroupChatMembership)
+admin.site.register(IMUser, UserAdmin)
+admin.site.register(IMGroup)
+admin.site.register(IMGroupChat)

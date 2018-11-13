@@ -25,3 +25,8 @@
 
 1. <a href="https://layim.layui.com/" target="_blank">LayIM</a>(已获得授权)
 2. <a href="https://www.layui.com/" target="_blank">LayUI</a>(开源)
+
+##待实现功能
+
+1. 客服
+2. 聊天机器人

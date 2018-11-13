@@ -1,11 +1,12 @@
 import uuid
 import django
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
-class User(models.Model):
+class IMUser(AbstractUser):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	username = models.CharField(max_length=100, verbose_name="用户名")
+	username = models.CharField(max_length=100, unique=True, verbose_name="用户名")
 	password = models.CharField(max_length=100, verbose_name="密码")
 	email = models.EmailField(verbose_name="邮箱")
 	phone = models.CharField(max_length=11, verbose_name="手机号")
@@ -26,9 +27,6 @@ class User(models.Model):
 	# 用户头像
 	avatar = models.CharField(max_length=128, default='/statics/img/default_avatar_male_180.gif', verbose_name="头像")
 	
-	# avatar = models.ImageField(upload_to='statics/upload/%y%m%d', blank=True, null=True,
-	# 						   default='/statics/img/default_avatar_male_180.gif', verbose_name="头像")
-	
 	STATUS = (
 		('ON', 'online'),
 		('OFF', 'hide'),
@@ -40,7 +38,7 @@ class User(models.Model):
 		return self.username
 
 
-class Group(models.Model):
+class IMGroup(models.Model):
 	'''
 	好友分组，属于某个用户
 	一个用户（User）有多个好友分组（Group），
@@ -48,23 +46,23 @@ class Group(models.Model):
 	'''
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=128)
-	owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner', default=None)
-	group_members = models.ManyToManyField(User)
+	owner = models.ForeignKey(IMUser, on_delete=models.CASCADE, related_name='owner', default=None)
+	group_members = models.ManyToManyField(IMUser, related_name='group_members')
 	
 	def __str__(self):
 		return self.name
 	
 
-class GroupChat(models.Model):
+class IMGroupChat(models.Model):
 	'''
 	群聊，独立于用户存在
 	'''
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=128)
 	# 群聊管理员
-	group_admins = models.ManyToManyField(User, related_name="group_admins")
+	group_admins = models.ManyToManyField(IMUser, related_name="im_group_admins")
 	group_chat_avatar = models.CharField(max_length=128, default='/statics/img/default_avatar_male_180.gif')
-	group_chat_members = models.ManyToManyField(User, related_name='group_chat_members')
+	group_chat_members = models.ManyToManyField(IMUser, related_name='im_group_chat_members')
 	
 	def __str__(self):
 		return self.name
