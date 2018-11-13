@@ -10,7 +10,7 @@ chat/migrations/
 login/migrations/
 statics/upload/
 statics/src/
-statics/img/
+statics/img/*
 
 # Distribution / packaging
 .Python
