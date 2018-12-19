@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+	'utils',
 	'agent',
 	'channels',
 	'login',
@@ -73,7 +74,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'WebIM.wsgi.application'
 
-
 # Channels
 ASGI_APPLICATION = 'WebIM.routing.application'
 CHANNEL_LAYERS = {
@@ -87,53 +87,46 @@ CHANNEL_LAYERS = {
 
 # cache
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            # 'PASSWORD': redis_url.password,
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PICKLE_VERSION': -1,  # Use the latest protocol version 默认使用最新的 pickle.
+	'default': {
+		'BACKEND': 'django_redis.cache.RedisCache',
+		'LOCATION': 'redis://127.0.0.1:6379/1',
+		'OPTIONS': {
+			# 'PASSWORD': redis_url.password,
+			'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+			'PICKLE_VERSION': -1,  # Use the latest protocol version 默认使用最新的 pickle.
 			'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds socket 建立连接超时设置
-            'SOCKET_TIMEOUT': 60,  # in seconds 连接建立后的读写操作超时设置
-			"CONNECTION_POOL_KWARGS": {"max_connections": 100},		# 配置默认连接池
-            'IGNORE_EXCEPTIONS': True,
-        }
-    }
+			'SOCKET_TIMEOUT': 60,  # in seconds 连接建立后的读写操作超时设置
+			"CONNECTION_POOL_KWARGS": {"max_connections": 100},  # 配置默认连接池
+			'IGNORE_EXCEPTIONS': True,
+		}
+	}
 }
 
-REDIS_TIMEOUT = 7*24*60*60
-CUBES_REDIS_TIMEOUT = 60*60
-NEVER_REDIS_TIMEOUT = 365*24*60*60
+REDIS_TIMEOUT = 7 * 24 * 60 * 60
+CUBES_REDIS_TIMEOUT = 60 * 60
+NEVER_REDIS_TIMEOUT = 365 * 24 * 60 * 60
 
 # Django 默认可以使用任何 cache backend 作为 session backend,
 # 将 django-redis 作为 session 储存后端不用安装任何额外的 backend
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-# DATABASES = {
-# 	'default': {
-# 		'ENGINE': 'django.db.backends.sqlite3',
-# 		'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-# 	}
-# }
-
-
-def mysql_settings():
-	MYSQL_HOST = '127.0.0.1'
-	MYSQL_PORT = '3306'
-	MYSQL_USERNAME = 'root'
-	MYSQL_PASSWORD = '123456'
-	MYSQL_DBNAME = 'webim'
-	return dict(ENGINE='django.db.backends.mysql', NAME=MYSQL_DBNAME, USER=MYSQL_USERNAME, PASSWORD=MYSQL_PASSWORD,
-				HOST=MYSQL_HOST, PORT=MYSQL_PORT, OPTIONS={'charset': 'utf8mb4'})
-
-
 DATABASES = {
-	'default': mysql_settings()
+	'default': {
+		# 'ENGINE': 'django.db.backends.sqlite3',
+		# 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		'ENGINE': 'django.db.backends.mysql',
+		'NAME': 'webim',
+		'USER': 'root',
+		'PASSWORD': '123456',
+		'HOST': '127.0.0.1',
+		'PORT': 3306,
+		'OPTIONS': {'charset': 'utf8mb4'}
+	}
 }
 
 # Password validation
@@ -179,7 +172,6 @@ STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "statics"),
 ]
 
-
 # 上传文件白名单
 ALLOWED_EXTENSIONS = ('txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip')
 # 2.5MB - 2621440
@@ -205,6 +197,19 @@ SESSION_COOKIE_AGE = 60 * 5
 SESSION_SAVE_EVERY_REQUEST = True
 # 关闭浏览器，则COOKIE失效
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# celery
+CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_RESULT_BACKEND = 'amqp://localhost'
+CELERY_TASK_SERIALIZER = 'msgpack'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
+CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERY_ENABLE_UTC = True
+
+# celery相关命令
+# celery -A WebIM worker -l info
 
 # 本地开发配置放在local_settings.py中
 # try:

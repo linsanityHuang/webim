@@ -2,6 +2,7 @@ import uuid
 import django
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
 
 
 class IMUser(AbstractUser):
@@ -32,7 +33,7 @@ class IMUser(AbstractUser):
 		('OFF', 'hide'),
 	)
 	status = models.CharField(max_length=8, choices=STATUS, default='OFF', verbose_name="状态")
-	created_time = models.DateTimeField(editable=False, default=django.utils.timezone.now, verbose_name="创建时间")
+	created_time = models.DateTimeField(editable=False, default=now, verbose_name="创建时间")
 	
 	def __str__(self):
 		return self.username
