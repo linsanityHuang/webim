@@ -1,8 +1,9 @@
-#Web-IM
+#WebIM
 
 ##介绍
+
 这是一个web端即时通讯，目前尚处于开发过程中，主体功能已经完成，但是一些细节功能尚需优化和补充。
-目前该项目已经部署在阿里云，部署方案采用Nginx+supervisor+daphne+gunicorn, 如需体验请访问https://iwantme.cn
+目前该项目已经部署在阿里云，部署方案采用Nginx+supervisor+daphne+gunicorn, ~~如需体验请访问https://iwantme.cn~~
 
 
 ##功能介绍
@@ -26,7 +27,8 @@
 6. Docker
 
 ### 前端
-#######由于前端框架需要获得授权，所以此开源项目并不包括前端代码
+**由于前端框架需要获得授权，所以此开源项目并不包括前端代码**
+
 1. <a href="https://layim.layui.com/" target="_blank">LayIM</a>(已获得授权)
 2. <a href="https://www.layui.com/" target="_blank">LayUI</a>(开源)
 
@@ -39,26 +41,34 @@
 ##部署准备
 
 ###安装依赖
-1. python3.6
+1. python3.7.4
 2. pip install -r requirements.txt
 
 ###数据库(docker container)
 1. MySQL
-***
+
 运行MySQL容器
-`docker run --name docker-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -d mysql`
-***
+```shell script
+docker run --name docker-mysql \
+-p 3306:3306 \
+-e MYSQL_ROOT_PASSWORD=topsecret \
+-d mysql:5.7
+```
+
 进入MySQL容器
-`docker exec -it docker-mysql mysql -uroot -p`
 
-`create database webim default character set utf8 collate utf8_general_ci;`
+```shell script
+docker exec -it docker-mysql mysql -uroot -p
+create database webim default character set utf8 collate utf8_general_ci;
+```
 
-`python manage.py makemigrations chat`
-`python manage.py migrate chat`
+2. 迁移数据库
+```shell script
+python manage.py makemigrations chat
+python manage.py migrate chat
+```
 
-2. Redis
-***
-`docker run --name docker-redis -p 6379:6379 -d redis`
-
-###配置文件
-1. setting.py (Debug = True, Domain)
+3. Redis
+```shell script
+docker run --name docker-redis -p 6379:6379 -d redis
+```

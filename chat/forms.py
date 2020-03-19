@@ -1,10 +1,10 @@
 from django import forms
-from .models import User
+from .models import IMUser
 
 
 class SignUpForm(forms.Form):
 	class Meta:
-		model = User
+		model = IMUser
 		fields = (
 			'username', 'password', 'email',
 			'phone', 'sex', 'birthday'
