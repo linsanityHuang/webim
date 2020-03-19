@@ -1,4 +1,3 @@
-# chat/consumers.py
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer

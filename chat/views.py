@@ -1,4 +1,3 @@
-# chat/views.py
 import time
 import uuid
 import datetime

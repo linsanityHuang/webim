@@ -1,3 +1,4 @@
+
 class Result:
 	SUCCESS_CODE = 0
 	FAIL_CODE = 1

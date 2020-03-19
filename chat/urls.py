@@ -1,4 +1,3 @@
-# chat/urls.py
 from . import views
 from django.conf.urls import url
 
